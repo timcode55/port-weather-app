@@ -27,7 +27,7 @@ weatherForm.addEventListener('submit', (e) => {
 	// FETCH UNSPLASH API DATA FOR BACKGROUND IMAGE FROM QUERIED CITY
 
 	fetch(
-		'https://api.unsplash.com/search/photos?page=' +
+		'https://cors-anywhere.herokuapp.com/https://api.unsplash.com/search/photos?page=' +
 			randomPage +
 			'&query=' +
 			location +
@@ -70,7 +70,10 @@ let longitude = -121.943692018703;
 
 let fetchData = (latitude, longitude) => {
 	fetch(
-		'https://api.darksky.net/forecast/757c5a5c185c90b230b94d7c401fe771/' + latitude + ',' + longitude
+		'https://cors-anywhere.herokuapp.com/https://api.darksky.net/forecast/757c5a5c185c90b230b94d7c401fe771/' +
+			latitude +
+			',' +
+			longitude
 	).then((response) => {
 		response.json().then((data) => {
 			display = [];
@@ -83,7 +86,9 @@ let fetchData = (latitude, longitude) => {
 			display.push({ 'Dew Point': data.currently.dewPoint });
 			display.push({ 'UV Index': data.currently.uvIndex });
 			display.push({ 'Ozone Level': data.currently.ozone });
-			display.push({ 'Cloud Cover': data.currently.cloudCover * 100 });
+			display.push({ Visibility: data.currently.visibility });
+			display.push({ Pressure: data.currently.pressure });
+			display.push({ 'Cloud Cover': parseInt(data.currently.cloudCover * 100) });
 			display.push({ Sunset: new Date(data.daily.data[0].sunsetTime * 1000).toLocaleString() });
 			displayData();
 		});
@@ -94,7 +99,7 @@ let fetchData = (latitude, longitude) => {
 
 let getAccu = (location) => {
 	fetch(
-		'https://dataservice.accuweather.com/locations/v1/cities/search?apikey=GJKGfMXiYFeHPUV3p3oHc28uvCAEvLTY&q=' +
+		'https://cors-anywhere.herokuapp.com/https://dataservice.accuweather.com/locations/v1/cities/search?apikey=GJKGfMXiYFeHPUV3p3oHc28uvCAEvLTY&q=' +
 			location +
 			'&details=true'
 	).then((response) => {
@@ -105,7 +110,7 @@ let getAccu = (location) => {
 	});
 	let pollenForecast = (locationKey) => {
 		fetch(
-			'https://dataservice.accuweather.com/forecasts/v1/daily/1day/' +
+			'https://cors-anywhere.herokuapp.com/https://dataservice.accuweather.com/forecasts/v1/daily/1day/' +
 				locationKey +
 				'?apikey=GJKGfMXiYFeHPUV3p3oHc28uvCAEvLTY&details=true'
 		).then((response) => {
