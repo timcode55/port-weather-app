@@ -1,6 +1,9 @@
 const express = require('express');
 const path = require('path');
 const request = require('request');
+require('dotenv').config();
+
+console.log(process.env);
 // const request = require('request-promise');
 
 // FETCH BACKGROUND IMAGE FOR STATIC HOME PAGE
@@ -23,7 +26,8 @@ app.get('/weatherdark/:latlon', async (req, res) => {
 	const lat = latlon[0];
 	const lon = latlon[1];
 	console.log(lat, lon);
-	url = `https://api.darksky.net/forecast/757c5a5c185c90b230b94d7c401fe771/${lat},${lon}`;
+	let api_key = process.env.API_KEY;
+	url = `https://api.darksky.net/forecast/${api_key}/${lat},${lon}`;
 	await request({ url }, (error, response, body) => {
 		if (error || response.statusCode !== 200) {
 			return res.status(500).json({ type: 'error', message: err.message });
