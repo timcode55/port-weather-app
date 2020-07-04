@@ -16,7 +16,6 @@ weatherForm.addEventListener('submit', (e) => {
 	e.preventDefault();
 	display = [];
 	const location = search.value;
-	console.log(location);
 	getLatLong(location);
 	getAccu(location);
 	search.value = '';
@@ -72,9 +71,6 @@ async function fetchData(lat, lon) {
 	const testingData = await axios
 		.get(`/weatherdark/${lat},${lon}`)
 		.then((response) => {
-			console.log(response);
-			console.log(response.data.currently.apparentTemperature);
-			// display = [];
 			display.push({ 'Forecast Today': response.data.currently.summary });
 			display.push({ 'Current Temp': response.data.currently.temperature });
 			display.push({ 'Wind Speed': response.data.currently.windSpeed });
@@ -88,8 +84,6 @@ async function fetchData(lat, lon) {
 			display.push({ Pressure: response.data.currently.pressure });
 			display.push({ 'Cloud Cover': parseInt(response.data.currently.cloudCover * 100) });
 			display.push({ Sunset: new Date(response.data.daily.data[0].sunsetTime * 1000).toLocaleString() });
-			console.log(display);
-			console.log(location);
 			displayData(display);
 		})
 		.catch((error) => {
@@ -106,7 +100,6 @@ let getAccu = async (location) => {
 			'&details=true'
 	).then((response) => {
 		response.json().then((data) => {
-			console.log(response);
 			let locationKey = data[0].Key;
 			pollenForecast(locationKey);
 		});
@@ -118,7 +111,6 @@ let getAccu = async (location) => {
 				'?apikey=GJKGfMXiYFeHPUV3p3oHc28uvCAEvLTY&details=true'
 		).then((response) => {
 			response.json().then((data) => {
-				console.log(data);
 				display.push({
 					'Air Quality': `${data.DailyForecasts[0].AirAndPollen[0].Value} - ${data.DailyForecasts[0]
 						.AirAndPollen[0].Category}`
@@ -139,7 +131,6 @@ let getAccu = async (location) => {
 					Tree: `${data.DailyForecasts[0].AirAndPollen[4].Value} - ${data.DailyForecasts[0].AirAndPollen[4]
 						.Category}`
 				});
-				console.log(display);
 				// displayData();
 			});
 		});
@@ -150,9 +141,7 @@ let getAccu = async (location) => {
 
 function displayData(display) {
 	let div = document.createElement('div');
-	console.log(display);
 	for (let item of display) {
-		console.log(item);
 		for (let key in item) {
 			div.innerHTML += `<article class="notification is-primary today">
   <p class="forecastTitle">${key}</p>
