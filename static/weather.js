@@ -14,8 +14,11 @@ let display = [];
 
 weatherForm.addEventListener('submit', (e) => {
 	e.preventDefault();
+	display = [];
 	const location = search.value;
+	console.log(location);
 	getLatLong(location);
+	getAccu(location);
 	search.value = '';
 	const randomPage = Math.floor(Math.random() * 10);
 	let editTitle = document.querySelector('.title');
@@ -40,7 +43,6 @@ weatherForm.addEventListener('submit', (e) => {
 			document.body.style.backgroundImage = `url('${result}')`;
 			document.body.style.backgroundSize = 'cover';
 			document.body.style.height = '100vh';
-			getAccu(location);
 		});
 	});
 });
@@ -54,25 +56,25 @@ let getLatLong = (location) => {
 			'.json?access_token=pk.eyJ1IjoicGV0bWFwNTUiLCJhIjoiY2s3NmZiYzl2MHFpZTNtbzNycHh0aDlnMCJ9.oERa5PVzkVL4oEZXMOWnxA&limit=1'
 	).then((response) => {
 		response.json().then((data) => {
-			let latitude = data.features[0].bbox[1];
-			let longitude = data.features[0].bbox[0];
-			fetchData(latitude, longitude);
+			let lat = data.features[0].bbox[1];
+			let lon = data.features[0].bbox[0];
+			fetchData(lat, lon);
 		});
 	});
 };
 
-let latitude = 36.5964139832728;
-let longitude = -121.943692018703;
+let lat = 36.5964139832728;
+let lon = -121.943692018703;
 
 // GET FORECAST WITH THE LATITUDE AND LONGITUDE
 
-async function fetchData(latitude, longitude) {
+async function fetchData(lat, lon) {
 	const testingData = await axios
-		.get('/weatherdark/')
+		.get(`/weatherdark/${lat},${lon}`)
 		.then((response) => {
 			console.log(response);
 			console.log(response.data.currently.apparentTemperature);
-			display = [];
+			// display = [];
 			display.push({ 'Forecast Today': response.data.currently.summary });
 			display.push({ 'Current Temp': response.data.currently.temperature });
 			display.push({ 'Wind Speed': response.data.currently.windSpeed });
@@ -86,7 +88,9 @@ async function fetchData(latitude, longitude) {
 			display.push({ Pressure: response.data.currently.pressure });
 			display.push({ 'Cloud Cover': parseInt(response.data.currently.cloudCover * 100) });
 			display.push({ Sunset: new Date(response.data.daily.data[0].sunsetTime * 1000).toLocaleString() });
-			displayData();
+			console.log(display);
+			console.log(location);
+			displayData(display);
 		})
 		.catch((error) => {
 			console.log(error);
@@ -95,13 +99,14 @@ async function fetchData(latitude, longitude) {
 
 // GET ACCUWEATHER DATA FOR THE POLLEN LEVELS
 
-let getAccu = (location) => {
-	fetch(
+let getAccu = async (location) => {
+	await fetch(
 		'https://dataservice.accuweather.com/locations/v1/cities/search?apikey=GJKGfMXiYFeHPUV3p3oHc28uvCAEvLTY&q=' +
 			location +
 			'&details=true'
 	).then((response) => {
 		response.json().then((data) => {
+			console.log(response);
 			let locationKey = data[0].Key;
 			pollenForecast(locationKey);
 		});
@@ -113,6 +118,7 @@ let getAccu = (location) => {
 				'?apikey=GJKGfMXiYFeHPUV3p3oHc28uvCAEvLTY&details=true'
 		).then((response) => {
 			response.json().then((data) => {
+				console.log(data);
 				display.push({
 					'Air Quality': `${data.DailyForecasts[0].AirAndPollen[0].Value} - ${data.DailyForecasts[0]
 						.AirAndPollen[0].Category}`
@@ -133,7 +139,8 @@ let getAccu = (location) => {
 					Tree: `${data.DailyForecasts[0].AirAndPollen[4].Value} - ${data.DailyForecasts[0].AirAndPollen[4]
 						.Category}`
 				});
-				displayData();
+				console.log(display);
+				// displayData();
 			});
 		});
 	};
@@ -141,9 +148,11 @@ let getAccu = (location) => {
 
 // DISPLAY DATA ON THE PAGE
 
-function displayData() {
+function displayData(display) {
 	let div = document.createElement('div');
+	console.log(display);
 	for (let item of display) {
+		console.log(item);
 		for (let key in item) {
 			div.innerHTML += `<article class="notification is-primary today">
   <p class="forecastTitle">${key}</p>

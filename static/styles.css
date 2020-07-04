@@ -153,11 +153,14 @@ input[type="search"] {
 }
 
 .notification.is-primary {
+	display: flex;
 	background: rgba(170, 170, 170, .8);
 	width: 350px;
 	border-radius: 1%;
-	margin: 0 auto;
+	/* margin: 0 auto; */
 	margin: 5px;
+	height: 145px;
+	justify-content: flex-end;
 }
 
 #target > div:nth-child(2) {

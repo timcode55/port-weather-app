@@ -1,0 +1,37 @@
+@media only screen and (max-width: 768px) {
+	.notification.is-primary.today {
+		height: 165px;
+	}
+}
+
+@media only screen and (max-width: 375px) {
+	.back-title {
+		height: 100px;
+	}
+
+	.title.background-title {
+		font-size: 1.2rem;
+	}
+
+	.flex-form {
+		display: flex;
+		flex-direction: column;
+		width: 75vw;
+		justify-content: space-around;
+	}
+	.ion-location {
+		height: 200px;
+	}
+	.searchField {
+		height: 200px;
+		margin-bottom: 20px;
+	}
+
+	/* .formLabel {
+		height: 200px;
+  } */
+
+	.submit {
+		margin-top: 22px;
+	}
+}

@@ -16,6 +16,7 @@
     />
     <!-- <link rel="stylesheet" href="styles.css"> -->
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="media-queries.css">
   <title>LOCAL WEATHER APP</title>
 </head>
 <body>
@@ -27,12 +28,12 @@
     <h1 class="title"></h1>
   </div>
   <form  class="flex-form">
-    <label for="from">
+    <label for="from" class="formLabel">
       <i class="ion-location"></i>
     </label>
     
-    <input type="search" placeholder="Enter a location for the forecast">
-    <input type="submit" value="Search">
+    <input type="search" class="searchField" placeholder="Enter a location for the forecast">
+    <input type="submit" class="submit" value="Search">
   </form>
   </div>
 </div>
@@ -52,6 +53,6 @@
   </div>
   <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <script src="../weather.js"></script>
-  <!-- <script src="app.js"></script> -->
+
 </body>
 </html>
