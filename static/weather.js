@@ -14,6 +14,7 @@ let display = [];
 
 weatherForm.addEventListener('submit', (e) => {
 	e.preventDefault();
+	console.log(display);
 	display = [];
 	const location = search.value;
 	getLatLong(location);
@@ -71,16 +72,18 @@ async function fetchData(lat, lon) {
 	const testingData = await axios
 		.get(`/weatherdark/${lat},${lon}`)
 		.then((response) => {
+			display.push({ 'Week Summary': response.data.daily.summary });
 			display.push({ 'Forecast Today': response.data.currently.summary });
+			display.push({ Tomorrow: response.data.daily.data[1].summary });
 			display.push({ 'Current Temp': response.data.currently.temperature });
 			display.push({ 'Wind Speed': response.data.currently.windSpeed });
 			display.push({ 'Wind Gust': response.data.currently.windGust });
-			display.push({ Tomorrow: response.data.daily.data[1].summary });
 			display.push({ 'Cur Humidity': response.data.currently.humidity * 100 });
 			display.push({ 'Dew Point': response.data.currently.dewPoint });
 			display.push({ 'UV Index': response.data.currently.uvIndex });
-			display.push({ 'Ozone Level': response.data.currently.ozone });
-			display.push({ Visibility: response.data.currently.visibility });
+			display.push({
+				'Wind Gust Time': new Date(response.data.daily.data[0].windGustTime * 1000).toLocaleString()
+			});
 			display.push({ Pressure: response.data.currently.pressure });
 			display.push({ 'Cloud Cover': parseInt(response.data.currently.cloudCover * 100) });
 			display.push({ Sunset: new Date(response.data.daily.data[0].sunsetTime * 1000).toLocaleString() });
