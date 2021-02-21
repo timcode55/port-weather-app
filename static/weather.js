@@ -84,7 +84,8 @@ async function fetchData(lat, lon) {
 			});
 			display.push({ 'Cur Humidity': response.data.currently.humidity * 100 });
 			display.push({ 'Dew Point': response.data.currently.dewPoint });
-			display.push({ 'UV Index': response.data.currently.uvIndex });
+			display.push({ Sunrise: new Date(response.data.daily.data[0].sunriseTime * 1000).toLocaleString() });
+			displayData(display);
 			display.push({ Sunset: new Date(response.data.daily.data[0].sunsetTime * 1000).toLocaleString() });
 			displayData(display);
 		})
