@@ -4,9 +4,6 @@ const urlBackground =
 document.body.style.backgroundImage = `url('${urlBackground}')`;
 document.body.style.backgroundSize = 'cover';
 document.body.style.height = '100vh';
-const messageOne = document.querySelector('#message-one');
-let forecast = document.querySelector('#target');
-const messageTwo = document.querySelector('#message-two');
 const weatherForm = document.querySelector('form');
 const search = document.querySelector('input');
 
