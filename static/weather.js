@@ -82,7 +82,7 @@ async function fetchData(lat, lon) {
 			display.push({
 				'Wind Gust Time': new Date(response.data.daily.data[0].windGustTime * 1000).toLocaleString()
 			});
-			display.push({ 'Cur Humidity': response.data.currently.humidity * 100 });
+			display.push({ 'Cur Humidity': (response.data.currently.humidity * 100).toFixed(2) });
 			display.push({ 'Dew Point': response.data.currently.dewPoint });
 			display.push({ Sunrise: new Date(response.data.daily.data[0].sunriseTime * 1000).toLocaleString() });
 			displayData(display);
