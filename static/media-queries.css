@@ -1,37 +1,37 @@
 @media only screen and (max-width: 768px) {
-	.notification.is-primary.today {
-		height: 165px;
+	.container {
+		grid-template-columns: repeat(2, 1fr);
+		grid-gap: 10px;
 	}
 }
 
-@media only screen and (max-width: 375px) {
-	.back-title {
-		height: 100px;
+@media only screen and (max-width: 450px) {
+	.container {
+		display: flex;
+		flex-direction: column;
 	}
 
-	.title.background-title {
-		font-size: 1.2rem;
+	#pollenCounts {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+	}
+	.background-title {
+		text-align: center;
+		font-size: 1rem;
+		padding: 10px;
 	}
 
 	.flex-form {
 		display: flex;
 		flex-direction: column;
-		width: 75vw;
-		justify-content: space-around;
+		width: 100%;
 	}
-	.ion-location {
-		height: 200px;
-	}
-	.searchField {
-		height: 200px;
-		margin-bottom: 20px;
-	}
-
-	/* .formLabel {
-		height: 200px;
-  } */
 
 	.submit {
-		margin-top: 22px;
+		margin-top: 30px;
+	}
+	.searchField {
+		overflow: hidden;
 	}
 }
