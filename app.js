@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const request = require('request');
 require('dotenv').config();
+const cors = require('cors');
 
 // FETCH BACKGROUND IMAGE FOR STATIC HOME PAGE
 
@@ -10,7 +11,7 @@ const PORT = process.env.PORT || 9000;
 let app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname + '/static')));
-// CORS SOLUTION
+app.use(cors());
 
 app.use((req, res, next) => {
 	res.header('Access-Control-Allow-Origin', '*');
