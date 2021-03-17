@@ -39,8 +39,10 @@ weatherSearch();
 // GET LATITUDE AND LONGITUDE FOR ENTERED LOCATION
 
 let getLatLong = async (location) => {
+	console.log('location', location);
 	await axios.get(`/mapbox/${location}`).then((response) => {
 		const data = response.data;
+		console.log(data, 'data in mapbox route');
 		let lat = data.features[0].bbox[1];
 		let lon = data.features[0].bbox[0];
 		fetchData(lat, lon);
@@ -81,10 +83,11 @@ async function fetchData(lat, lon) {
 
 // GET ACCUWEATHER DATA FOR THE POLLEN LEVELS
 
-let getAccu = async (location) => {
+async function getAccu(location) {
 	const pollenForecast = async (locationKey) => {
 		await axios.get(`/accuweather/${locationKey}`).then((response) => {
 			const data = response.data;
+			console.log(data, 'pollen data');
 			display.push({
 				'Air Quality': `${data.DailyForecasts[0].AirAndPollen[0].Value} - ${data.DailyForecasts[0]
 					.AirAndPollen[0].Category}`
@@ -112,11 +115,12 @@ let getAccu = async (location) => {
 		let locationKey = response.data[0].Key;
 		pollenForecast(locationKey);
 	});
-};
+}
 
 // DISPLAY DATA ON THE PAGE
 
 function displayData(display) {
+	console.log(display, 'display data in displayData function');
 	let div = document.createElement('div');
 	for (let item of display) {
 		for (let key in item) {

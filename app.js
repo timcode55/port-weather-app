@@ -72,10 +72,13 @@ app.get('/unsplash/:location', async (req, res) => {
 
 app.get('/mapbox/:location', async (req, res) => {
 	const location = req.params.location;
+	console.log(location, 'location');
+	console.log(typeof location, 'locationtype');
 	let api_key = process.env.MAPBOX_KEY;
-	url = `https://api.mapbox.com/geocoding/v5/mapbox.places/' +
-  encodeURIComponent(${location}) +
-  '.json?access_token=${api_key}&limit=1`;
+	let newLocation = encodeURIComponent(location);
+	console.log(newLocation, 'newLocation');
+	url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${newLocation}.json?access_token=${api_key}&limit=1`;
+	// url = `https://api.mapbox.com/geocoding/v5/mapbox.places/pacific%20grove.json?access_token=${api_key}&limit=1`;
 	await request({ url }, (error, response, body) => {
 		if (error || response.statusCode !== 200) {
 			return res.status(500).json({ type: 'error', message: err.message });
