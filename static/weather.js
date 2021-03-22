@@ -119,17 +119,22 @@ async function getAccu(location) {
 
 // DISPLAY DATA ON THE PAGE
 
-function displayData(display) {
-	console.log(display, 'display data in displayData function');
-	let div = document.createElement('div');
-	for (let item of display) {
-		for (let key in item) {
-			div.innerHTML += `<article class="notification is-primary today">
-  <p class="forecastTitle">${key}</p>
-  <p class="forecast">${item[key]}</p>
-  </article>`;
+async function displayData(display) {
+	console.log(display, 'display data in displayData function', display.length);
+	let div = await document.createElement('div');
+
+	setTimeout(() => {
+		for (let item of display) {
+			// console.log(item, 'item');
+			for (let key in item) {
+				// console.log(key, 'key');
+				div.innerHTML += `<article class="notification is-primary today">
+    <p class="forecastTitle">${key}</p>
+    <p class="forecast">${item[key]}</p>
+    </article>`;
+			}
 		}
-	}
+	}, 1000);
 
 	div.classList.add('main-div');
 	target.innerHTML = '';
