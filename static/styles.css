@@ -125,7 +125,7 @@ input[type="search"] {
 
 .background-title {
 	height: 60px;
-	background: rgba(25, 27, 23, .7);
+	background: rgba(25, 27, 23, .6);
 	padding: 10px 10px 20px 10px;
 	align-items: center;
 }
@@ -311,4 +311,13 @@ p {
 
 .hidden {
 	visibility: hidden;
+}
+
+#visibility,
+#ozone,
+#humidity,
+#pollenCounts,
+#current-temp,
+#forecast-today {
+	font-size: 1.5rem;
 }

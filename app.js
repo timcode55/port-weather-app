@@ -3,6 +3,7 @@ const path = require('path');
 const request = require('request');
 require('dotenv').config();
 const axios = require('axios');
+const cors = require('cors');
 
 // FETCH BACKGROUND IMAGE FOR STATIC HOME PAGE
 
@@ -11,6 +12,7 @@ const PORT = process.env.PORT || 9000;
 let app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname + '/static')));
+app.use(cors());
 // CORS SOLUTION
 
 app.use((req, res, next) => {
