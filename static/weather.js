@@ -1,18 +1,9 @@
 const urlBackground =
 	'https://images.unsplash.com/photo-1530089711124-9ca31fb9e863?ixlib=rb-1.2.1&q=85&fm=jpg&crop=entropy&cs=srgb&ixid=eyJhcHBfaWQiOjEyNDk1NX0';
 
-// const getBackground = () => {
-// 	axios.get('/background').then((res) => {
-// 		console.log(res.data);
-// 		document.body.style.backgroundImage = `url('${res.data}')`;
-// 	});
-// };
-
-// getBackground();
-
 document.body.style.backgroundImage = `url('${urlBackground}')`;
 document.body.style.backgroundSize = 'cover';
-document.body.style.height = '100vh';
+document.body.style.height = '120vh';
 const messageOne = document.querySelector('#message-one');
 let forecast = document.querySelector('#target');
 const messageTwo = document.querySelector('#message-two');
@@ -35,39 +26,25 @@ weatherForm.addEventListener('submit', (e) => {
 
 	// FETCH UNSPLASH API DATA FOR BACKGROUND IMAGE FROM QUERIED CITY
 
-	fetch(
-		'https://api.unsplash.com/search/photos?page=' +
-			randomPage +
-			'&query=' +
-			location +
-			'&client_id=LyTILpYq9RlxI2Zefq96p9KRqORAkQyQ6cYqjngIUVg'
-	).then((response) => {
-		response.json().then((data) => {
-			const random = Math.floor(Math.random() * 10);
-			let result = data.results[random].urls.full;
-			// let resultMiami =
-			// 	'https://images.unsplash.com/photo-1543968332-f99478b1ebdc?ixlib=rb-1.2.1&q=85&fm=jpg&crop=entropy&cs=srgb&ixid=eyJhcHBfaWQiOjEyNDk1NX0';
-			// let resultLA = 'https://images.unsplash.com/photo-1534190760961-74e8c1c5c3da?ixlib=rb-1.2.1&q=85&fm=jpg&crop=entropy&cs=srgb&ixid=eyJhcHBfaWQiOjEyNDk1NX0'
-			document.body.style.backgroundImage = `url('${result}')`;
-			document.body.style.backgroundSize = 'center/cover';
-			document.body.style.height = '100vh';
-		});
+	axios.get(`/unsplash/${location}`).then((response) => {
+		const random = Math.floor(Math.random() * 10);
+		let result = response.data.results[random].urls.full;
+		document.body.style.backgroundImage = `url('${result}')`;
+		document.body.style.backgroundSize = 'cover';
+		document.body.style.height = '100vh';
 	});
 });
 
 // GET LATITUDE AND LONGITUDE FOR ENTERED LOCATION
 
-let getLatLong = (location) => {
-	fetch(
-		'https://api.mapbox.com/geocoding/v5/mapbox.places/' +
-			encodeURIComponent(location) +
-			'.json?access_token=pk.eyJ1IjoicGV0bWFwNTUiLCJhIjoiY2s3NmZiYzl2MHFpZTNtbzNycHh0aDlnMCJ9.oERa5PVzkVL4oEZXMOWnxA&limit=1'
-	).then((response) => {
-		response.json().then((data) => {
-			let lat = data.features[0].bbox[1];
-			let lon = data.features[0].bbox[0];
-			fetchData(lat, lon);
-		});
+let getLatLong = async (location) => {
+	console.log('location', location);
+	await axios.get(`/mapbox/${location}`).then((response) => {
+		const data = response.data;
+		console.log(data, 'data in mapbox route');
+		let lat = data.features[0].bbox[1];
+		let lon = data.features[0].bbox[0];
+		fetchData(lat, lon);
 	});
 };
 
@@ -108,49 +85,39 @@ async function fetchData(lat, lon) {
 
 // GET ACCUWEATHER DATA FOR THE POLLEN LEVELS
 
-let getAccu = async (location) => {
-	await fetch(
-		'https://dataservice.accuweather.com/locations/v1/cities/search?apikey=GJKGfMXiYFeHPUV3p3oHc28uvCAEvLTY&q=' +
-			location +
-			'&details=true'
-	).then((response) => {
-		response.json().then((data) => {
-			let locationKey = data[0].Key;
-			pollenForecast(locationKey);
-		});
-	});
-	let pollenForecast = (locationKey) => {
-		fetch(
-			'https://dataservice.accuweather.com/forecasts/v1/daily/1day/' +
-				locationKey +
-				'?apikey=GJKGfMXiYFeHPUV3p3oHc28uvCAEvLTY&details=true'
-		).then((response) => {
-			response.json().then((data) => {
-				display.push({
-					airQuality: `${data.DailyForecasts[0].AirAndPollen[0].Value} - ${data.DailyForecasts[0]
-						.AirAndPollen[0].Category}`
-				});
-				display.push({
-					grass: `${data.DailyForecasts[0].AirAndPollen[1].Value} - ${data.DailyForecasts[0].AirAndPollen[1]
-						.Category}`
-				});
-				display.push({
-					mold: `${data.DailyForecasts[0].AirAndPollen[2].Value} - ${data.DailyForecasts[0].AirAndPollen[2]
-						.Category}`
-				});
-				display.push({
-					ragweed: `${data.DailyForecasts[0].AirAndPollen[3].Value} - ${data.DailyForecasts[0].AirAndPollen[3]
-						.Category}`
-				});
-				display.push({
-					tree: `${data.DailyForecasts[0].AirAndPollen[4].Value} - ${data.DailyForecasts[0].AirAndPollen[4]
-						.Category}`
-				});
-				// displayData();
+async function getAccu(location) {
+	const pollenForecast = async (locationKey) => {
+		await axios.get(`/accuweather/${locationKey}`).then((response) => {
+			const data = response.data;
+			console.log(data, 'pollen data');
+			display.push({
+				airQuality: `${data.DailyForecasts[0].AirAndPollen[0].Value} - ${data.DailyForecasts[0].AirAndPollen[0]
+					.Category}`
 			});
+			display.push({
+				grass: `${data.DailyForecasts[0].AirAndPollen[1].Value} - ${data.DailyForecasts[0].AirAndPollen[1]
+					.Category}`
+			});
+			display.push({
+				mold: `${data.DailyForecasts[0].AirAndPollen[2].Value} - ${data.DailyForecasts[0].AirAndPollen[2]
+					.Category}`
+			});
+			display.push({
+				ragweed: `${data.DailyForecasts[0].AirAndPollen[3].Value} - ${data.DailyForecasts[0].AirAndPollen[3]
+					.Category}`
+			});
+			display.push({
+				tree: `${data.DailyForecasts[0].AirAndPollen[4].Value} - ${data.DailyForecasts[0].AirAndPollen[4]
+					.Category}`
+			});
+			// displayData();
 		});
 	};
-};
+	await axios.get(`/accu/${location}`).then((response) => {
+		let locationKey = response.data[0].Key;
+		pollenForecast(locationKey);
+	});
+}
 
 // DISPLAY DATA ON THE PAGE
 
@@ -160,7 +127,6 @@ function temp(display) {
 		item.classList.toggle('hidden');
 	});
 	console.log(display, 'display');
-	let temp = document.getElementById('temp');
 	let tempMin = document.getElementById('temp-min');
 	let tempMax = document.getElementById('temp-max');
 	let weekSummary = document.getElementById('week-summary');
@@ -181,27 +147,35 @@ function temp(display) {
 	let currentTemp = document.getElementById('current-temp');
 	let visibility = document.getElementById('visibility');
 	let ozone = document.getElementById('ozone');
-	// temp.textContent = display[10].maxTemp;
-	tempMin.textContent = display[9].minTemp;
-	tempMax.textContent = display[10].maxTemp;
-	weekSummary.textContent = display[5].weekSummary;
-	airQuality.textContent = display[0].airQuality;
-	grass.textContent = display[1].grass;
-	mold.textContent = display[2].mold;
-	ragweed.textContent = display[3].ragweed;
-	tree.textContent = display[4].tree;
-	sunrise.textContent = display[18].sunrise;
-	sunset.textContent = display[19].sunset;
-	humidity.textContent = display[14].humidity;
-	windGust.textContent = display[12].windGust;
-	windGustTime.textContent = display[13].windGustTime;
-	windSpeed.textContent = display[11].windSpeed;
-	dewPoint.textContent = display[15].dewPoint;
-	forecastToday.textContent = display[6].forecastToday;
-	forecastTomorrow.textContent = display[7].forecastTomorrow;
-	currentTemp.textContent = display[8].currentTemp;
-	visibility.textContent = display[16].visibility;
-	ozone.textContent = display[17].ozone;
+	let weatherObj = {};
+
+	for (let i = 0; i < display.length; i++) {
+		for (item in display[i]) {
+			weatherObj[item] = display[i][item];
+		}
+	}
+
+	tempMin.textContent = `${~~weatherObj['minTemp']}°`;
+	tempMax.textContent = `${~~weatherObj['maxTemp']}°`;
+	weekSummary.textContent = weatherObj['weekSummary'];
+	airQuality.textContent = weatherObj['airQuality'];
+	grass.textContent = weatherObj['grass'];
+	console.log(grass.textContent, 'grass.textContent');
+	mold.textContent = weatherObj['mold'];
+	ragweed.textContent = weatherObj['ragweed'];
+	tree.textContent = weatherObj['tree'];
+	sunrise.textContent = weatherObj['sunrise'];
+	sunset.textContent = weatherObj['sunset'];
+	humidity.textContent = `${~~weatherObj['humidity']}%`;
+	windGust.textContent = `${~~weatherObj['windGust']} mph`;
+	windGustTime.textContent = weatherObj['windGustTime'];
+	windSpeed.textContent = `${~~weatherObj['windSpeed']} mph`;
+	dewPoint.textContent = `${~~weatherObj['maxTemp']}°C Td`;
+	forecastToday.textContent = weatherObj['forecastToday'];
+	forecastTomorrow.textContent = weatherObj['forecastTomorrow'];
+	currentTemp.textContent = ~~weatherObj['currentTemp'];
+	visibility.textContent = `${~~weatherObj['visibility']} miles`;
+	ozone.textContent = `${~~weatherObj['ozone']} units`;
 }
 
 function displayData(display) {

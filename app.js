@@ -7,11 +7,11 @@ const cors = require('cors');
 
 // FETCH BACKGROUND IMAGE FOR STATIC HOME PAGE
 
-const PORT = process.env.PORT || 9000;
+const PORT = process.env.PORT || 7000;
 
 let app = express();
 app.use(express.json());
-app.use(express.static(path.join(__dirname + '/static')));
+app.use(express.static(path.join(__dirname, 'static')));
 app.use(cors());
 // CORS SOLUTION
 
@@ -34,25 +34,57 @@ app.get('/weatherdark/:latlon', async (req, res) => {
 	});
 });
 
-app.get('/background', function(req, res) {
+app.get('/accu/:location', async (req, res) => {
+	const location = req.params.location;
+	let api_key = process.env.ACCU_KEY;
+	url = `https://dataservice.accuweather.com/locations/v1/cities/search?apikey=${api_key}&q=${location}&details=true`;
+	await request({ url }, (error, response, body) => {
+		if (error || response.statusCode !== 200) {
+			return res.status(500).json({ type: 'error', message: err.message });
+		}
+		res.json(JSON.parse(body));
+	});
+});
+
+app.get('/accuweather/:locationKey', async (req, res) => {
+	const locationKey = req.params.locationKey;
+	let api_key = process.env.ACCU_KEY;
+	url = `https://dataservice.accuweather.com/forecasts/v1/daily/1day/${locationKey}?apikey=${api_key}&details=true`;
+	await request({ url }, (error, response, body) => {
+		if (error || response.statusCode !== 200) {
+			return res.status(500).json({ type: 'error', message: err.message });
+		}
+		res.json(JSON.parse(body));
+	});
+});
+
+app.get('/unsplash/:location', async (req, res) => {
+	const location = req.params.location;
+	let api_key = process.env.UNSPLASH_KEY;
 	const randomPage = Math.floor(Math.random() * 10);
-	let background = axios(
-		'https://api.unsplash.com/search/photos?page=' +
-			randomPage +
-			'&query=' +
-			'miami' +
-			'&client_id=LyTILpYq9RlxI2Zefq96p9KRqORAkQyQ6cYqjngIUVg'
-	).then((response) => {
-		(response) => response.data;
-		const random = Math.floor(Math.random() * 10);
-		let result = response.data.results[random].urls.full;
-		res.send(result);
-		// let resultMiami =
-		// 	'https://images.unsplash.com/photo-1543968332-f99478b1ebdc?ixlib=rb-1.2.1&q=85&fm=jpg&crop=entropy&cs=srgb&ixid=eyJhcHBfaWQiOjEyNDk1NX0';
-		// let resultLA = 'https://images.unsplash.com/photo-1534190760961-74e8c1c5c3da?ixlib=rb-1.2.1&q=85&fm=jpg&crop=entropy&cs=srgb&ixid=eyJhcHBfaWQiOjEyNDk1NX0'
-		// document.body.style.backgroundImage = `url('${result}')`;
-		// document.body.style.backgroundSize = 'center/cover';
-		// document.body.style.height = '100vh';
+	url = `https://api.unsplash.com/search/photos?page=${randomPage}&query=${location}&client_id=${api_key}`;
+	await request({ url }, (error, response, body) => {
+		if (error || response.statusCode !== 200) {
+			return res.status(500).json({ type: 'error', message: err.message });
+		}
+		res.json(JSON.parse(body));
+	});
+});
+
+app.get('/mapbox/:location', async (req, res) => {
+	const location = req.params.location;
+	console.log(location, 'location');
+	console.log(typeof location, 'locationtype');
+	let api_key = process.env.MAPBOX_KEY;
+	let newLocation = encodeURIComponent(location);
+	console.log(newLocation, 'newLocation');
+	url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${newLocation}.json?access_token=${api_key}&limit=1`;
+	// url = `https://api.mapbox.com/geocoding/v5/mapbox.places/pacific%20grove.json?access_token=${api_key}&limit=1`;
+	await request({ url }, (error, response, body) => {
+		if (error || response.statusCode !== 200) {
+			return res.status(500).json({ type: 'error', message: err.message });
+		}
+		res.json(JSON.parse(body));
 	});
 });
 
