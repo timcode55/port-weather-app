@@ -146,19 +146,19 @@ async function temp(display) {
 	let ozone = document.getElementById('ozone');
 
 	let weatherObj = {};
-	// console.log(display, 'display at start of weatherObj creation');
+	console.log(display, 'display at start of weatherObj creation');
 	for (let i = 0; i < display.length; i++) {
 		for (item in display[i]) {
 			weatherObj[item] = display[i][item];
 		}
 	}
-	// console.log(weatherObj, 'weatherObj before textContent section');
+	console.log(weatherObj, 'weatherObj before textContent section');
 	tempMin.textContent = `${~~weatherObj['minTemp']}°`;
 	tempMax.textContent = `${~~weatherObj['maxTemp']}°`;
 	weekSummary.textContent = weatherObj['weekSummary'];
 	airQuality.textContent = weatherObj['airQuality'];
 	grass.textContent = weatherObj['grass'];
-	// console.log(grass.textContent, 'grass.textContent');
+	console.log(grass.textContent, 'grass.textContent');
 	mold.textContent = weatherObj['mold'];
 	ragweed.textContent = weatherObj['ragweed'];
 	tree.textContent = weatherObj['tree'];
