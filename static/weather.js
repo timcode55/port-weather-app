@@ -147,33 +147,39 @@ async function temp(display) {
 
 	let weatherObj = {};
 	// console.log(display, 'display at start of weatherObj creation');
-	for (let i = 0; i < display.length; i++) {
-		for (item in display[i]) {
-			weatherObj[item] = display[i][item];
-		}
-	}
-	// console.log(weatherObj, 'weatherObj before textContent section');
-	tempMin.textContent = `${~~weatherObj['minTemp']}°`;
-	tempMax.textContent = `${~~weatherObj['maxTemp']}°`;
-	weekSummary.textContent = weatherObj['weekSummary'];
-	airQuality.textContent = weatherObj['airQuality'];
-	grass.textContent = weatherObj['grass'];
-	// console.log(grass.textContent, 'grass.textContent');
-	mold.textContent = weatherObj['mold'];
-	ragweed.textContent = weatherObj['ragweed'];
-	tree.textContent = weatherObj['tree'];
-	sunrise.textContent = weatherObj['sunrise'];
-	sunset.textContent = weatherObj['sunset'];
-	humidity.textContent = `${~~weatherObj['humidity']}%`;
-	windGust.textContent = `${~~weatherObj['windGust']} mph`;
-	windGustTime.textContent = weatherObj['windGustTime'];
-	windSpeed.textContent = `${~~weatherObj['windSpeed']} mph`;
-	dewPoint.textContent = `${~~weatherObj['maxTemp']}°C Td`;
-	forecastToday.textContent = weatherObj['forecastToday'];
-	forecastTomorrow.textContent = weatherObj['forecastTomorrow'];
-	currentTemp.textContent = ~~weatherObj['currentTemp'];
-	visibility.textContent = `${~~weatherObj['visibility']} miles`;
-	ozone.textContent = `${~~weatherObj['ozone']} units`;
+
+	const delayDisplay = async () => {
+		setTimeout(() => {
+			for (let i = 0; i < display.length; i++) {
+				for (item in display[i]) {
+					weatherObj[item] = display[i][item];
+				}
+			}
+			console.log(weatherObj, 'weatherObj in setTimeout, will this work?');
+			tempMin.textContent = `${~~weatherObj['minTemp']}°`;
+			tempMax.textContent = `${~~weatherObj['maxTemp']}°`;
+			weekSummary.textContent = weatherObj['weekSummary'];
+			airQuality.textContent = weatherObj['airQuality'];
+			grass.textContent = weatherObj['grass'];
+			console.log(grass.textContent, 'grass.textContent');
+			mold.textContent = weatherObj['mold'];
+			ragweed.textContent = weatherObj['ragweed'];
+			tree.textContent = weatherObj['tree'];
+			sunrise.textContent = weatherObj['sunrise'];
+			sunset.textContent = weatherObj['sunset'];
+			humidity.textContent = `${~~weatherObj['humidity']}%`;
+			windGust.textContent = `${~~weatherObj['windGust']} mph`;
+			windGustTime.textContent = weatherObj['windGustTime'];
+			windSpeed.textContent = `${~~weatherObj['windSpeed']} mph`;
+			dewPoint.textContent = `${~~weatherObj['maxTemp']}°C Td`;
+			forecastToday.textContent = weatherObj['forecastToday'];
+			forecastTomorrow.textContent = weatherObj['forecastTomorrow'];
+			currentTemp.textContent = ~~weatherObj['currentTemp'];
+			visibility.textContent = `${~~weatherObj['visibility']} miles`;
+			ozone.textContent = `${~~weatherObj['ozone']} units`;
+		}, 1000);
+	};
+	delayDisplay();
 }
 
 function displayData(display) {
