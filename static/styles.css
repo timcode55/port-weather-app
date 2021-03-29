@@ -244,7 +244,8 @@ p {
 
 .container > div {
 	cursor: pointer;
-	height: 210px;
+	height: auto;
+	min-height: 10rem;
 	background-size: cover;
 	background-attachment: fixed;
 
