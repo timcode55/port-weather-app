@@ -1,199 +1,383 @@
 const urlBackground =
-	'https://images.unsplash.com/photo-1530089711124-9ca31fb9e863?ixlib=rb-1.2.1&q=85&fm=jpg&crop=entropy&cs=srgb&ixid=eyJhcHBfaWQiOjEyNDk1NX0';
+  "https://images.unsplash.com/photo-1530089711124-9ca31fb9e863?ixlib=rb-1.2.1&q=85&fm=jpg&crop=entropy&cs=srgb&ixid=eyJhcHBfaWQiOjEyNDk1NX0";
 
 document.body.style.backgroundImage = `url('${urlBackground}')`;
-document.body.style.backgroundSize = 'cover';
-document.body.style.height = '120vh';
-const messageOne = document.querySelector('#message-one');
-let forecast = document.querySelector('#target');
-const messageTwo = document.querySelector('#message-two');
-const weatherForm = document.querySelector('form');
-const search = document.querySelector('input');
+document.body.style.backgroundSize = "cover";
+document.body.style.height = "120vh";
+const messageOne = document.querySelector("#message-one");
+let forecast = document.querySelector("#target");
+const messageTwo = document.querySelector("#message-two");
+const weatherForm = document.querySelector("form");
+const search = document.querySelector("input");
 
-weatherForm.addEventListener('submit', (e) => {
-	e.preventDefault();
-	display = [];
-	const location = search.value;
-	getLatLong(location);
-	getAccu(location);
-	search.value = '';
-	const randomPage = Math.floor(Math.random() * 10);
-	let editTitle = document.querySelector('.title');
-	editTitle.classList.add('background-title');
-	editTitle.innerHTML = `${location} local weather`;
+weatherForm.addEventListener("submit", (e) => {
+  e.preventDefault();
 
-	// FETCH UNSPLASH API DATA FOR BACKGROUND IMAGE FROM QUERIED CITY
+  // Immediately hide all data when searching for a new city
+  let toggle = document.querySelectorAll(".hidden, .container > div:not(.hidden)");
+  toggle.forEach((item) => {
+    if (!item.classList.contains("hidden")) {
+      item.classList.add("hidden");
+    }
+  });
 
-	axios.get(`/unsplash/${location}`).then((response) => {
-		const random = Math.floor(Math.random() * 10);
-		let result = response.data.results[random].urls.full;
-		document.body.style.backgroundImage = `url('${result}')`;
-		document.body.style.backgroundSize = 'cover';
-		document.body.style.height = '100vh';
-	});
+  display = [];
+  const location = search.value;
+  getOpenMeteoWeather(location);
+  search.value = "";
+  const randomPage = Math.floor(Math.random() * 10);
+  let editTitle = document.querySelector(".title");
+  editTitle.classList.add("background-title");
+  editTitle.innerHTML = `${location} local weather`;
+  getUnsplashImage(location);
+
+  // FETCH UNSPLASH API DATA FOR BACKGROUND IMAGE FROM QUERIED CITY
+  async function getUnsplashImage(location) {
+    console.log(location, "LOCATION");
+    // Encode the location properly and add cache-busting timestamp
+    const encodedLocation = encodeURIComponent(location);
+    const timestamp = Date.now();
+
+    await axios.get(`/unsplash/${encodedLocation}?t=${timestamp}`)
+      .then((response) => {
+        if (!response.data.results || response.data.results.length === 0) {
+          console.log("No images found for location, using default");
+          document.body.style.backgroundImage = `url('https://images.unsplash.com/photo-1583847323635-7ad5b93640ad?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=3572&q=80')`;
+          return;
+        }
+
+        // Use a different random index each time to avoid same image
+        const random = Math.floor(Math.random() * response.data.results.length);
+        let result = response.data.results[random]?.urls.full ||
+          "https://images.unsplash.com/photo-1583847323635-7ad5b93640ad?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=3572&q=80";
+
+        console.log(result, "result");
+        console.log(`Selected image ${random + 1} of ${response.data.results.length}`);
+        document.body.style.backgroundImage = `url('${result}')`;
+        document.body.style.backgroundSize = "cover";
+        document.body.style.height = "100vh";
+      })
+      .catch((error) => {
+        console.error("Error fetching Unsplash image:", error);
+        console.error("Error response:", error.response?.data);
+        // Use default image on error
+        document.body.style.backgroundImage = `url('https://images.unsplash.com/photo-1583847323635-7ad5b93640ad?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=3572&q=80')`;
+      });
+  }
 });
 
 // GET LATITUDE AND LONGITUDE FOR ENTERED LOCATION
 
-let getLatLong = async (location) => {
-	await axios.get(`/mapbox/${location}`).then((response) => {
-		const data = response.data;
-		let lat = data.features[0].bbox[1];
-		let lon = data.features[0].bbox[0];
-		fetchData(lat, lon, location);
-	});
-};
+// let getLatLong = async (location) => {
+//   await axios.get(`/mapbox/${location}`).then((response) => {
+//     const data = response.data;
+//     let lat = data.features[0].center[1];
+//     let lon = data.features[0].center[0];
+//     //   fetchData(lat, lon, location);
+//   });
+// };
 
 let lat = 36.5964139832728;
 let lon = -121.943692018703;
 
 // GET FORECAST WITH THE LATITUDE AND LONGITUDE
 let display = [];
-async function fetchData(lat, lon, location) {
-	await axios
-		.get(`/weatherdark/${lat},${lon}`)
-		.then((response) => {
-			display.push({ weekSummary: response.data.daily.summary });
-			display.push({ forecastToday: response.data.currently.summary });
-			display.push({ forecastTomorrow: response.data.daily.data[1].summary });
-			display.push({ currentTemp: response.data.currently.temperature });
-			display.push({ minTemp: Math.round(response.data.daily.data[0].temperatureMin) });
-			display.push({ maxTemp: Math.round(response.data.daily.data[0].temperatureMax) });
-			display.push({ windSpeed: response.data.currently.windSpeed });
-			display.push({ windGust: response.data.currently.windGust });
-			display.push({
-				windGustTime: new Date(response.data.daily.data[0].windGustTime * 1000).toLocaleString()
-			});
-			display.push({ humidity: (response.data.currently.humidity * 100).toFixed(2) });
-			display.push({ dewPoint: response.data.currently.dewPoint });
-			display.push({ visibility: response.data.currently.visibility });
-			display.push({ ozone: response.data.currently.ozone });
-			display.push({ sunrise: new Date(response.data.daily.data[0].sunriseTime * 1000).toLocaleString() });
-			display.push({ sunset: new Date(response.data.daily.data[0].sunsetTime * 1000).toLocaleString() });
-			// let waitDisplay = async () => {
-			// 	const delayDisplay = await display;
-			// 	console.log(delayDisplay, 'delayDisplay will this work?');
-			// };
-			// waitDisplay();
-		})
-		.catch((error) => {
-			console.log(error);
-		});
-}
 
-// GET ACCUWEATHER DATA FOR THE POLLEN LEVELS
+// GET OPEN-METEO WEATHER DATA (Free, with air quality & pollen!)
 
-async function getAccu(location) {
-	const pollenForecast = async (locationKey) => {
-		await axios.get(`/accuweather/${locationKey}`).then((response) => {
-			const data = response.data;
-			display.push({
-				airQuality: `${data.DailyForecasts[0].AirAndPollen[0].Value} - ${data.DailyForecasts[0].AirAndPollen[0]
-					.Category}`
-			});
-			display.push({
-				grass: `${data.DailyForecasts[0].AirAndPollen[1].Value} - ${data.DailyForecasts[0].AirAndPollen[1]
-					.Category}`
-			});
-			display.push({
-				mold: `${data.DailyForecasts[0].AirAndPollen[2].Value} - ${data.DailyForecasts[0].AirAndPollen[2]
-					.Category}`
-			});
-			display.push({
-				ragweed: `${data.DailyForecasts[0].AirAndPollen[3].Value} - ${data.DailyForecasts[0].AirAndPollen[3]
-					.Category}`
-			});
-			display.push({
-				tree: `${data.DailyForecasts[0].AirAndPollen[4].Value} - ${data.DailyForecasts[0].AirAndPollen[4]
-					.Category}`
-			});
-			temp(display);
-		});
-	};
-	await axios.get(`/accu/${location}`).then((response) => {
-		let locationKey = response.data[0].Key;
-		pollenForecast(locationKey);
-	});
+async function getOpenMeteoWeather(location) {
+  await axios.get(`/weather/${location}`)
+    .then((response) => {
+      const data = response.data;
+      const weather = data.weather;
+      const airQuality = data.airQuality;
+      const pollen = data.pollen;
+
+      const current = weather.current;
+      const daily = weather.daily;
+
+      // Helper functions
+      const getAQICategory = (aqi) => {
+        if (aqi <= 50) return "Good";
+        if (aqi <= 100) return "Moderate";
+        if (aqi <= 150) return "Unhealthy for Sensitive Groups";
+        if (aqi <= 200) return "Unhealthy";
+        if (aqi <= 300) return "Very Unhealthy";
+        return "Hazardous";
+      };
+
+      const getPollenLevel = (value) => {
+        if (value === 0) return "None";
+        if (value <= 10) return "Low";
+        if (value <= 50) return "Medium";
+        if (value <= 100) return "High";
+        return "Very High";
+      };
+
+      const getWindDirection = (degrees) => {
+        const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+        return directions[Math.round(degrees / 45) % 8];
+      };
+
+      const getWindArrow = (degrees) => {
+        // Returns a rotated arrow icon based on wind direction
+        // Wind direction is "from" direction, so arrow points opposite way
+        const rotation = (degrees + 180) % 360;
+        return `<i class="fas fa-long-arrow-alt-up" style="transform: rotate(${rotation}deg); display: inline-block;"></i>`;
+      };
+
+      const getWeatherDescription = (code) => {
+        const descriptions = {
+          0: "Clear sky",
+          1: "Mainly clear",
+          2: "Partly cloudy",
+          3: "Overcast",
+          45: "Foggy",
+          48: "Depositing rime fog",
+          51: "Light drizzle",
+          53: "Moderate drizzle",
+          55: "Dense drizzle",
+          61: "Slight rain",
+          63: "Moderate rain",
+          65: "Heavy rain",
+          71: "Slight snow",
+          73: "Moderate snow",
+          75: "Heavy snow",
+          77: "Snow grains",
+          80: "Slight rain showers",
+          81: "Moderate rain showers",
+          82: "Violent rain showers",
+          85: "Slight snow showers",
+          86: "Heavy snow showers",
+          95: "Thunderstorm",
+          96: "Thunderstorm with slight hail",
+          99: "Thunderstorm with heavy hail"
+        };
+        return descriptions[code] || "Unknown";
+      };
+
+      const getWeatherIcon = (code) => {
+        // Map weather codes to Font Awesome icons
+        const icons = {
+          0: "fas fa-sun",                    // Clear sky
+          1: "fas fa-sun",                    // Mainly clear
+          2: "fas fa-cloud-sun",              // Partly cloudy
+          3: "fas fa-cloud",                  // Overcast
+          45: "fas fa-smog",                  // Foggy
+          48: "fas fa-smog",                  // Depositing rime fog
+          51: "fas fa-cloud-rain",            // Light drizzle
+          53: "fas fa-cloud-rain",            // Moderate drizzle
+          55: "fas fa-cloud-showers-heavy",   // Dense drizzle
+          61: "fas fa-cloud-rain",            // Slight rain
+          63: "fas fa-cloud-showers-heavy",   // Moderate rain
+          65: "fas fa-cloud-showers-heavy",   // Heavy rain
+          71: "fas fa-snowflake",             // Slight snow
+          73: "fas fa-snowflake",             // Moderate snow
+          75: "fas fa-snowflake",             // Heavy snow
+          77: "fas fa-snowflake",             // Snow grains
+          80: "fas fa-cloud-rain",            // Slight rain showers
+          81: "fas fa-cloud-showers-heavy",   // Moderate rain showers
+          82: "fas fa-cloud-showers-heavy",   // Violent rain showers
+          85: "fas fa-snowflake",             // Slight snow showers
+          86: "fas fa-snowflake",             // Heavy snow showers
+          95: "fas fa-bolt",                  // Thunderstorm
+          96: "fas fa-bolt",                  // Thunderstorm with slight hail
+          99: "fas fa-bolt"                   // Thunderstorm with heavy hail
+        };
+        return icons[code] || "fas fa-question";
+      };
+
+      // AIR QUALITY DATA
+      const usAQI = airQuality.current.us_aqi || 0;
+      display.push({
+        airQuality: `${usAQI} - ${getAQICategory(usAQI)}`,
+      });
+
+      // POLLEN DATA (may be null depending on location/season)
+      const grassPollen = pollen.current.grass_pollen;
+      const ragweedPollen = pollen.current.ragweed_pollen;
+      const birchPollen = pollen.current.birch_pollen;
+
+      display.push({
+        grass: grassPollen !== null ? `${grassPollen} - ${getPollenLevel(grassPollen)}` : "No data available",
+      });
+      display.push({
+        mold: "Not available", // Open-Meteo doesn't have mold
+      });
+      display.push({
+        ragweed: ragweedPollen !== null ? `${ragweedPollen} - ${getPollenLevel(ragweedPollen)}` : "No data available",
+      });
+      display.push({
+        tree: birchPollen !== null ? `${birchPollen} - ${getPollenLevel(birchPollen)}` : "No data available",
+      });
+
+      // TEMPERATURE DATA (already in Fahrenheit from API)
+      display.push({
+        minTemp: Math.round(daily.temperature_2m_min[0]),
+      });
+      display.push({
+        maxTemp: Math.round(daily.temperature_2m_max[0]),
+      });
+      display.push({
+        currentTemp: `${Math.round(current.temperature_2m)}`,
+      });
+
+      // Debug cloud cover
+      console.log('Cloud cover raw value:', current.cloud_cover);
+      display.push({
+        cloudCover: `${Math.round(current.cloud_cover || 0)}`,
+      });
+
+      // WIND DATA (already in mph from API)
+      display.push({
+        windGust: `${Math.round(current.wind_gusts_10m || 0)}`,
+      });
+      display.push({
+        windGustDirection: `${getWindArrow(current.wind_direction_10m || 0)} ${getWindDirection(current.wind_direction_10m || 0)}`,
+      });
+      display.push({
+        windSpeed: `${Math.round(current.wind_speed_10m || 0)}`,
+      });
+      display.push({
+        windSpeedDirection: `${getWindArrow(current.wind_direction_10m || 0)} ${getWindDirection(current.wind_direction_10m || 0)}`,
+      });
+      display.push({
+        feelsLike: Math.round(current.apparent_temperature),
+      });
+
+      // WEATHER FORECAST
+      display.push({
+        forecastToday: getWeatherDescription(daily.weather_code[0]),
+      });
+      display.push({
+        weatherIcon: getWeatherIcon(daily.weather_code[0]),
+      });
+
+      // Tomorrow's forecast
+      if (daily.weather_code.length > 1) {
+        display.push({
+          forecastTomorrow: `${getWeatherDescription(daily.weather_code[1])} - Low: ${Math.round(daily.temperature_2m_min[1])}°F, High: ${Math.round(daily.temperature_2m_max[1])}°F`,
+        });
+      } else {
+        display.push({
+          forecastTomorrow: "Not available",
+        });
+      }
+
+      // SUNRISE/SUNSET
+      display.push({
+        sunrise: new Date(daily.sunrise[0]).toLocaleString(),
+      });
+      display.push({
+        sunset: new Date(daily.sunset[0]).toLocaleString(),
+      });
+
+      // OTHER CONDITIONS
+      display.push({
+        humidity: `${Math.round(current.relative_humidity_2m || 0)}`,
+      });
+      display.push({
+        uvIndex: `${daily.uv_index_max?.[0] || 0}`,
+      });
+
+      // Debug precipitation
+      console.log('Precipitation raw value:', daily.precipitation_sum?.[0]);
+      console.log('Daily object:', daily);
+      const precipValue = daily.precipitation_sum?.[0];
+      display.push({
+        precipitation: precipValue !== undefined && precipValue !== null ? precipValue.toFixed(2) : '0.00',
+      });
+
+      temp(display);
+    })
+    .catch((error) => {
+      console.error("Error fetching Open-Meteo weather:", error);
+      console.error("Error details:", error.response?.data);
+      alert(`Error: ${error.response?.data?.message || error.message}\n\nUnable to fetch weather data for this location.`);
+    });
 }
 
 // DISPLAY DATA ON THE PAGE
 
 async function temp(display) {
-	let toggle = document.querySelectorAll('.hidden');
-	toggle.forEach((item) => {
-		item.classList.toggle('hidden');
-	});
+  let toggle = document.querySelectorAll(".hidden");
+  toggle.forEach((item) => {
+    item.classList.toggle("hidden");
+  });
 
-	let tempMin = document.getElementById('temp-min');
-	let tempMax = document.getElementById('temp-max');
-	let weekSummary = document.getElementById('week-summary');
-	let airQuality = document.getElementById('air-quality');
-	let grass = document.getElementById('grass');
-	let mold = document.getElementById('mold');
-	let ragweed = document.getElementById('ragweed');
-	let tree = document.getElementById('tree');
-	let sunrise = document.getElementById('sunrise');
-	let sunset = document.getElementById('sunset');
-	let humidity = document.getElementById('humidity');
-	let windGust = document.getElementById('wind-gust');
-	let windGustTime = document.getElementById('wind-gust-time');
-	let windSpeed = document.getElementById('wind-speed');
-	let dewPoint = document.getElementById('dew-point');
-	let forecastToday = document.getElementById('forecast-today');
-	let forecastTomorrow = document.getElementById('forecast-tomorrow');
-	let currentTemp = document.getElementById('current-temp');
-	let visibility = document.getElementById('visibility');
-	let ozone = document.getElementById('ozone');
+  let tempMin = document.getElementById("temp-min");
+  let tempMax = document.getElementById("temp-max");
+  let weekSummary = document.getElementById("week-summary");
+  let airQuality = document.getElementById("air-quality");
+  let grass = document.getElementById("grass");
+  let mold = document.getElementById("mold");
+  let ragweed = document.getElementById("ragweed");
+  let tree = document.getElementById("tree");
+  let sunrise = document.getElementById("sunrise");
+  let sunset = document.getElementById("sunset");
+  let humidity = document.getElementById("humidity");
+  let windGust = document.getElementById("wind-gust");
+  let windSpeed = document.getElementById("wind-speed");
+  let feelsLike = document.getElementById("feels-like");
+  let cloudCover = document.getElementById("cloud-cover");
+  let forecastToday = document.getElementById("forecast-today");
+  let forecastTomorrow = document.getElementById("forecast-tomorrow");
+  let currentTemp = document.getElementById("current-temp");
+  let uvIndex = document.getElementById("uvIndex");
+  let weatherIcon = document.getElementById("weather-icon");
+  let precipitation = document.getElementById("precipitation");
 
-	let weatherObj = {};
-	// console.log(display, 'display at start of weatherObj creation');
+  let weatherObj = {};
 
-	const delayDisplay = async () => {
-		setTimeout(() => {
-			for (let i = 0; i < display.length; i++) {
-				for (item in display[i]) {
-					weatherObj[item] = display[i][item];
-				}
-			}
-			console.log(weatherObj, 'weatherObj in setTimeout, will this work?');
-			tempMin.textContent = `${~~weatherObj['minTemp']}°`;
-			tempMax.textContent = `${~~weatherObj['maxTemp']}°`;
-			weekSummary.textContent = weatherObj['weekSummary'];
-			airQuality.textContent = weatherObj['airQuality'];
-			grass.textContent = weatherObj['grass'];
-			console.log(grass.textContent, 'grass.textContent');
-			mold.textContent = weatherObj['mold'];
-			ragweed.textContent = weatherObj['ragweed'];
-			tree.textContent = weatherObj['tree'];
-			sunrise.textContent = weatherObj['sunrise'];
-			sunset.textContent = weatherObj['sunset'];
-			humidity.textContent = `${~~weatherObj['humidity']}%`;
-			windGust.textContent = `${~~weatherObj['windGust']} mph`;
-			windGustTime.textContent = weatherObj['windGustTime'];
-			windSpeed.textContent = `${~~weatherObj['windSpeed']} mph`;
-			dewPoint.textContent = `${~~weatherObj['maxTemp']}°C Td`;
-			forecastToday.textContent = weatherObj['forecastToday'];
-			forecastTomorrow.textContent = weatherObj['forecastTomorrow'];
-			currentTemp.textContent = ~~weatherObj['currentTemp'];
-			visibility.textContent = `${~~weatherObj['visibility']} miles`;
-			ozone.textContent = `${~~weatherObj['ozone']} units`;
-		}, 1000);
-	};
-	delayDisplay();
+  const delayDisplay = async () => {
+    setTimeout(() => {
+      for (let i = 0; i < display.length; i++) {
+        for (item in display[i]) {
+          weatherObj[item] = display[i][item];
+        }
+      }
+      tempMin.textContent = `${~~weatherObj["minTemp"]}°`;
+      tempMax.textContent = `${~~weatherObj["maxTemp"]}°`;
+      weekSummary.textContent = weatherObj["weekSummary"];
+      airQuality.textContent = weatherObj["airQuality"];
+      grass.textContent = weatherObj["grass"];
+      mold.textContent = weatherObj["mold"];
+      ragweed.textContent = weatherObj["ragweed"];
+      tree.textContent = weatherObj["tree"];
+      sunrise.textContent = weatherObj["sunrise"];
+      sunset.textContent = weatherObj["sunset"];
+      humidity.textContent = `${~~weatherObj["humidity"]}%`;
+      windGust.innerHTML = `${weatherObj["windGustDirection"]} ${~~weatherObj["windGust"]} mph`;
+      windSpeed.innerHTML = `${weatherObj["windSpeedDirection"]} ${~~weatherObj["windSpeed"]} mph`;
+      feelsLike.textContent = `${~~weatherObj["feelsLike"]}°`;
+      cloudCover.textContent = `${~~weatherObj["cloudCover"]}%`;
+      forecastToday.textContent = weatherObj["forecastToday"];
+      forecastTomorrow.textContent = weatherObj["forecastTomorrow"];
+      currentTemp.textContent = `${~~weatherObj["currentTemp"]}°`;
+      uvIndex.textContent = weatherObj["uvIndex"];
+      precipitation.textContent = `${weatherObj["precipitation"]}"`;
+
+      // Update weather icon
+      if (weatherObj["weatherIcon"]) {
+        weatherIcon.innerHTML = `<i class="${weatherObj["weatherIcon"]}"></i>`;
+      }
+    }, 1500);
+  };
+  delayDisplay();
 }
 
 function displayData(display) {
-	let div = document.createElement('div');
-	for (let item of display) {
-		for (let key in item) {
-			div.innerHTML += `<article class="notification is-primary today">
+  let div = document.createElement("div");
+  for (let item of display) {
+    for (let key in item) {
+      div.innerHTML += `<article class="notification is-primary today">
   <p class="forecastTitle">${key}</p>
   <p class="forecast">${item[key]}</p>
   </article>`;
-		}
-	}
+    }
+  }
 
-	div.classList.add('main-div');
-	target.innerHTML = '';
-	target.appendChild(div);
+  div.classList.add("main-div");
+  target.innerHTML = "";
+  target.appendChild(div);
 }
