@@ -318,6 +318,9 @@ async function getOpenMeteoWeather(location) {
       });
 
       temp(display);
+
+      // Display 7-day forecast
+      displayWeekForecast(daily, getWeatherIcon, getWeatherDescription);
     } catch (error) {
       console.error("Error fetching weather data:", error);
       console.error("Error details:", error.response?.data);
@@ -409,4 +412,49 @@ function displayData(display) {
   div.classList.add("main-div");
   target.innerHTML = "";
   target.appendChild(div);
+}
+
+// DISPLAY 7-DAY FORECAST
+function displayWeekForecast(daily, getWeatherIcon, getWeatherDescription) {
+  const forecastContainer = document.getElementById('forecast-week');
+  forecastContainer.innerHTML = ''; // Clear previous forecast
+
+  const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  // Display 7 days
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(daily.time[i]);
+    const dayName = i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : daysOfWeek[date.getDay()];
+
+    const highTemp = Math.round(daily.temperature_2m_max[i]);
+    const lowTemp = Math.round(daily.temperature_2m_min[i]);
+    const weatherCode = daily.weather_code[i];
+    const icon = getWeatherIcon(weatherCode);
+    const description = getWeatherDescription(weatherCode);
+    const precipitation = daily.precipitation_sum[i] || 0;
+
+    const dayCard = document.createElement('div');
+    dayCard.className = 'forecast-day';
+
+    let precipHtml = '';
+    if (precipitation > 0) {
+      precipHtml = `<div class="forecast-day-precip">💧 ${precipitation.toFixed(2)}"</div>`;
+    }
+
+    dayCard.innerHTML = `
+      <div class="forecast-day-name">${dayName}</div>
+      <div class="forecast-day-icon">
+        <i class="${icon}"></i>
+      </div>
+      <div class="forecast-day-temps">
+        <span class="forecast-day-high">${highTemp}°</span>
+        <span>/</span>
+        <span class="forecast-day-low">${lowTemp}°</span>
+      </div>
+      <div class="forecast-day-condition">${description}</div>
+      ${precipHtml}
+    `;
+
+    forecastContainer.appendChild(dayCard);
+  }
 }
