@@ -24,6 +24,6 @@
     "express": "^4.17.1",
     "path": "^0.12.7",
     "request": "^2.88.2",
-    "request-promise": "^4.2.5"
+    "request-promise": "^0.0.1"
   }
 }

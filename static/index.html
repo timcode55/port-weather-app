@@ -1,141 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-119574573-4"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+  <head>
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-Z8R54P30JY"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
 
-  gtag('config', 'UA-119574573-4');
-</script>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
+      gtag("config", "G-Z8R54P30JY");
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css"
     />
-    <link rel="icon" type="image/png" href="./images/favicon2.png">
+    <link rel="icon" type="image/png" href="./images/favicon2.png" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.5/css/bulma.css"
     />
-    <link rel="stylesheet" href="./styles.css">
-    <link rel="stylesheet" href="./media-queries.css">
-  <title>LOCAL WEATHER APP!|</title>
-</head>
-<body>
-  <div class="main-container">
- <header>
-  <div class="cover">
-    <div class="title-container">
-      <div class="back-title">
-    <h1 class="title"></h1>
-  </div>
-  <form  class="flex-form">
-    <label for="from" class="formLabel">
-      <i class="ion-location"></i>
-    </label>
-   
-    <input type="search" class="searchField" placeholder="Enter a location for the forecast">
-    <input type="submit" class="submit" value="Search">
-  </form>
-  </div>
-</div>
-</header>
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./media-queries.css" />
+    <title>LOCAL WEATHER APP</title>
+  </head>
+  <body>
+    <div class="main-container">
+      <header>
+        <div class="cover">
+          <div class="title-container">
+            <div class="back-title">
+              <h1 class="title"></h1>
+            </div>
+            <form class="flex-form">
+              <label for="from" class="formLabel">
+                <i class="ion-location"></i>
+              </label>
 
+              <input
+                type="search"
+                class="searchField"
+                placeholder="Enter a location for the forecast"
+              />
+              <input type="submit" class="submit" value="Search" />
+            </form>
+          </div>
+        </div>
+      </header>
 
-  <!-- new content -->
-  <div class="container">
-    <div class="bg1 hidden">
-      <h2 ><span id="temp-min">16 </span> <span>| </span><span id="temp-max"> 24</span></h2>
-      <p id="week-summary">Local Weather</p>
-    </div>
-    <div class="bg1 hidden">
-      <!-- <h2><i class="fas fa-battery-three-quarters"></i></h2> -->
-      <p>Air Quality</p>
-      <p id="air-quality">50 - Medium</p>
-    </div>
-    <div class="bg2 hidden">
-      <!-- <h2><i class="fas fa-running"></i></h2> -->
-      <p id="dew-point">Dew Point</p>
-      <p>Dew Point</p>
-    </div>
-    <div class="bg1 hidden">
-      <p>Forecast Today</p>
-      <h2 id="forecast-today">36 &deg;</h2>
-      
-    </div>
-    <div class="bg1 hidden">
-      <!-- <h2><i class="fas fa-bed"></i></h2> -->
-      <p>Forecast Tomorrow</p>
-      <p id="forecast-tomorrow">36</p>
-    </div>
-    <div class="bg2 hidden" id="pollenCounts">
-      <div class="tree">
-        <h2 id="tree">98 <span></span></h2>
-        <p>Tree</p>
+      <!-- new content -->
+      <div class="container">
+        <div class="bg1 hidden">
+          <h2>
+            <span id="temp-min"> </span> <span>| </span
+            ><span id="temp-max"> </span>
+          </h2>
+          <p id="week-summary">Local Weather</p>
+        </div>
+        <div class="bg1 hidden">
+          <!-- <h2><i class="fas fa-battery-three-quarters"></i></h2> -->
+          <p>Air Quality</p>
+          <p id="air-quality"></p>
+        </div>
+        <div class="bg2 hidden">
+          <h2 id="cloud-cover"></h2>
+          <p>Cloud Cover</p>
+        </div>
+        <div class="bg1 hidden">
+          <p>Forecast Today</p>
+          <h2 id="weather-icon"><i class="fas fa-cloud"></i></h2>
+          <h2 id="forecast-today">&deg;</h2>
+        </div>
+        <div class="bg1 hidden">
+          <p>Forecast Tomorrow</p>
+          <p id="forecast-tomorrow"></p>
+        </div>
+        <div class="bg2 hidden" id="pollenCounts">
+          <div class="tree">
+            <h2 id="tree"><span></span></h2>
+            <p>Tree</p>
+          </div>
+          <div class="ragweed">
+            <h2 id="ragweed"><span></span></h2>
+            <p>Ragweed</p>
+          </div>
+          <div class="mold">
+            <h2 id="mold"><span></span></h2>
+            <p>Mold</p>
+          </div>
+          <div class="grass">
+            <h2 id="grass"><span></span></h2>
+            <p>Grass</p>
+          </div>
+        </div>
+        <div class="bg1 hidden">
+          <h2 id="current-temp"><span>&deg;F</span></h2>
+          <p>Current Temp</p>
+        </div>
+        <div class="bg1 hidden">
+          <h2 id="humidity"></h2>
+          <p>Humidity</p>
+        </div>
+        <div class="bg2 hidden" id="sunrise-sunset">
+          <div class="sunrise">
+            <h2 id="sunrise"><span></span></h2>
+            <p>Sunrise</p>
+          </div>
+          <div class="sunset">
+            <h2 id="sunset"><span></span></h2>
+            <p>Sunset</p>
+          </div>
+        </div>
+        <div class="bg2 hidden" id="wind-speeds">
+          <div>
+            <h2 id="wind-speed"><span></span></h2>
+            <p>Wind Speed</p>
+          </div>
+          <div>
+            <h2 id="wind-gust"><span></span></h2>
+            <p>Wind Gust</p>
+          </div>
+          <div>
+            <h2 id="feels-like"><span></span></h2>
+            <p>Feels Like</p>
+          </div>
+        </div>
+        <div class="bg2 hidden">
+          <p>UV Index</p>
+          <h2 id="uvIndex"><span></span></h2>
+        </div>
+        <div class="bg1 hidden">
+          <p>Precipitation</p>
+          <h2 id="precipitation"><span></span></h2>
+        </div>
       </div>
-      <div class="ragweed">
-        <h2 id="ragweed">98 <span></span></h2>
-        <p>Ragweed</p>
-      </div>
-      <div class="mold">
-        <h2 id="mold">98 <span></span></h2>
-        <p>Mold</p>
-      </div>
-      <div class="grass">
-        <h2 id="grass">98 <span></span></h2>
-        <p>Grass</p>
-      </div>
     </div>
-    <div class="bg1 hidden">
-      <h2 id="current-temp">170 <span>lbs</span></h2>
-      <p>Current Temp</p>
-    </div>
-    <div class="bg1 hidden">
-      <h2 id="humidity">28 </h2>
-      <p>Humidity</p>
-    </div>
-    <div class="bg2 hidden" id="sunrise-sunset">
-      <div class="sunrise">
-        <h2 id="sunrise">118 <span></span></h2>
-        <p>Sunrise</p>
-      </div>
-      <div class="sunset">
-        <h2 id="sunset">118 <span></span></h2>
-        <p>Sunset</p>
-      </div>
-    </div>
-    <div class="bg2 hidden" id="wind-speeds">
-      <div >
-        <h2 id="wind-speed">680 <span></span></h2>
-        <p>Wind Speed</p>
-      </div>
-      <div >
-        <h2 id="wind-gust">680 <span></span></h2>
-        <p>Wind Gust</p>
-      </div>
-      <div >
-        <h2 id="wind-gust-time">680 <span></span></h2>
-        <p>Wind Gust Time</p>
-      </div>
-    </div>
-    <div class="bg2 hidden">
-      <!-- <h2><i class="fas fa-dumbbell"></i></h2> -->
-      <h2 id="visibility">85 <span></span></h2>
-      <p>Visibility</p>
-    </div>
-    <div class="bg2 hidden">
-      <h2 id="ozone">85 <span></span></h2>
-      <p>Ozone</p>
-    </div>
-  </div>
-</div>
-  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-  <script src="./weather.js"></script>
-
-</body>
+    <script src="./weather.js"></script>
+  </body>
 </html>
