@@ -3,7 +3,10 @@ const urlBackground =
 
 document.body.style.backgroundImage = `url('${urlBackground}')`;
 document.body.style.backgroundSize = "cover";
-document.body.style.height = "120vh";
+document.body.style.minHeight = "100vh";
+document.body.style.backgroundAttachment = "fixed";
+document.body.style.backgroundPosition = "center";
+document.body.style.backgroundRepeat = "no-repeat";
 const messageOne = document.querySelector("#message-one");
 let forecast = document.querySelector("#target");
 const messageTwo = document.querySelector("#message-two");
@@ -79,14 +82,20 @@ weatherForm.addEventListener("submit", (e) => {
     img.onload = function() {
       document.body.style.backgroundImage = `url('${imageUrl}')`;
       document.body.style.backgroundSize = "cover";
-      document.body.style.height = "100vh";
+      document.body.style.minHeight = "100vh";
+      document.body.style.backgroundAttachment = "fixed";
+      document.body.style.backgroundPosition = "center";
+      document.body.style.backgroundRepeat = "no-repeat";
     };
     img.onerror = function() {
       console.error("Failed to load image:", imageUrl);
       // Still set it as background even if preload fails
       document.body.style.backgroundImage = `url('${imageUrl}')`;
       document.body.style.backgroundSize = "cover";
-      document.body.style.height = "100vh";
+      document.body.style.minHeight = "100vh";
+      document.body.style.backgroundAttachment = "fixed";
+      document.body.style.backgroundPosition = "center";
+      document.body.style.backgroundRepeat = "no-repeat";
     };
     img.src = imageUrl;
   }
