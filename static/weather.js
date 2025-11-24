@@ -38,11 +38,15 @@ weatherForm.addEventListener("submit", (e) => {
     const encodedLocation = encodeURIComponent(location);
     const timestamp = Date.now();
 
+    // Clear existing background immediately to force browser to reload
+    document.body.style.backgroundImage = 'none';
+
     await axios.get(`/unsplash/${encodedLocation}?t=${timestamp}`)
       .then((response) => {
         if (!response.data.results || response.data.results.length === 0) {
           console.log("No images found for location, using default");
-          document.body.style.backgroundImage = `url('https://images.unsplash.com/photo-1583847323635-7ad5b93640ad?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=3572&q=80&nocache=${timestamp}')`;
+          const defaultUrl = `https://images.unsplash.com/photo-1583847323635-7ad5b93640ad?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=3572&q=80&t=${timestamp}`;
+          preloadAndSetBackground(defaultUrl);
           return;
         }
 
@@ -52,21 +56,39 @@ weatherForm.addEventListener("submit", (e) => {
           "https://images.unsplash.com/photo-1583847323635-7ad5b93640ad?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=3572&q=80";
 
         // Add cache-busting parameter to the image URL to force fresh load
-        const cacheBustingUrl = result + (result.includes('?') ? '&' : '?') + `nocache=${timestamp}`;
+        const cacheBustingUrl = result + (result.includes('?') ? '&' : '?') + `t=${timestamp}`;
 
         console.log(cacheBustingUrl, "result with cache busting");
         console.log(`Selected image ${random + 1} of ${response.data.results.length}`);
-        document.body.style.backgroundImage = `url('${cacheBustingUrl}')`;
-        document.body.style.backgroundSize = "cover";
-        document.body.style.height = "100vh";
+
+        // Preload image before setting as background to ensure it's fresh
+        preloadAndSetBackground(cacheBustingUrl);
       })
       .catch((error) => {
         console.error("Error fetching Unsplash image:", error);
         console.error("Error response:", error.response?.data);
         // Use default image on error with cache-busting
-        const timestamp = Date.now();
-        document.body.style.backgroundImage = `url('https://images.unsplash.com/photo-1583847323635-7ad5b93640ad?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=3572&q=80&nocache=${timestamp}')`;
+        const defaultUrl = `https://images.unsplash.com/photo-1583847323635-7ad5b93640ad?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=3572&q=80&t=${timestamp}`;
+        preloadAndSetBackground(defaultUrl);
       });
+  }
+
+  // Helper function to preload image and set as background
+  function preloadAndSetBackground(imageUrl) {
+    const img = new Image();
+    img.onload = function() {
+      document.body.style.backgroundImage = `url('${imageUrl}')`;
+      document.body.style.backgroundSize = "cover";
+      document.body.style.height = "100vh";
+    };
+    img.onerror = function() {
+      console.error("Failed to load image:", imageUrl);
+      // Still set it as background even if preload fails
+      document.body.style.backgroundImage = `url('${imageUrl}')`;
+      document.body.style.backgroundSize = "cover";
+      document.body.style.height = "100vh";
+    };
+    img.src = imageUrl;
   }
 });
 
