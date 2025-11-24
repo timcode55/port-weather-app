@@ -75,6 +75,15 @@ app.get("/accuCurrent/:locationKey", async (req, res) => {
 app.get("/unsplash/:location", async (req, res) => {
   const location = decodeURIComponent(req.params.location);
   let api_key = process.env.UNSPLASH_KEY;
+
+  // Set cache-control headers to prevent Vercel edge caching
+  res.set({
+    'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0',
+    'Surrogate-Control': 'no-store'
+  });
+
   // Use timestamp-based randomization for better variety
   const randomPage = Math.floor(Math.random() * 30) + 1;
   const perPage = 30;
