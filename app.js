@@ -75,11 +75,14 @@ app.get("/accuCurrent/:locationKey", async (req, res) => {
 app.get("/unsplash/:location", async (req, res) => {
   const location = decodeURIComponent(req.params.location);
   let api_key = process.env.UNSPLASH_KEY;
-  // Use a more varied random page to get different results
-  const randomPage = Math.floor(Math.random() * 20) + 1;
+  // Use timestamp-based randomization for better variety
+  const randomPage = Math.floor(Math.random() * 30) + 1;
+  const perPage = 30;
   const encodedQuery = encodeURIComponent(location);
-  url = `https://api.unsplash.com/search/photos?page=${randomPage}&query=${encodedQuery}&orientation=landscape&per_page=30&client_id=${api_key}`;
-  console.log(`Fetching Unsplash images for: ${location} (page ${randomPage})`);
+  // Add random order_by to get different results
+  const orderBy = Math.random() > 0.5 ? 'relevant' : 'latest';
+  url = `https://api.unsplash.com/search/photos?page=${randomPage}&query=${encodedQuery}&orientation=landscape&per_page=${perPage}&order_by=${orderBy}&client_id=${api_key}`;
+  console.log(`Fetching Unsplash images for: ${location} (page ${randomPage}, order: ${orderBy})`);
   await request({ url, gzip: true }, (error, response, body) => {
     if (error) {
       return res.status(500).json({ type: "error", message: error.message });
@@ -87,7 +90,9 @@ app.get("/unsplash/:location", async (req, res) => {
     if (response.statusCode !== 200) {
       return res.status(response.statusCode).json({ type: "error", message: body });
     }
-    res.json(JSON.parse(body));
+    const data = JSON.parse(body);
+    console.log(`Returned ${data.results?.length || 0} images for ${location}`);
+    res.json(data);
   });
 });
 
