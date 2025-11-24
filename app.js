@@ -171,6 +171,47 @@ app.get("/weather/:location", async (req, res) => {
   }
 });
 
+// ACCUWEATHER POLLEN ROUTE
+app.get("/pollen/:location", async (req, res) => {
+  const location = req.params.location;
+  let api_key = process.env.ACCU_KEY;
+
+  try {
+    // First, get the location key from AccuWeather
+    const locationUrl = `https://dataservice.accuweather.com/locations/v1/cities/search?apikey=${api_key}&q=${encodeURIComponent(location)}`;
+    const locationResponse = await axios.get(locationUrl);
+
+    if (!locationResponse.data || locationResponse.data.length === 0) {
+      return res.status(404).json({ type: "error", message: "Location not found" });
+    }
+
+    const locationKey = locationResponse.data[0].Key;
+
+    // Get daily forecast with pollen data
+    const forecastUrl = `https://dataservice.accuweather.com/forecasts/v1/daily/1day/${locationKey}?apikey=${api_key}&details=true`;
+    const forecastResponse = await axios.get(forecastUrl);
+
+    // Extract pollen data
+    const airAndPollen = forecastResponse.data.DailyForecasts[0].AirAndPollen;
+
+    const pollenData = {
+      grass: airAndPollen.find(item => item.Name === "Grass"),
+      mold: airAndPollen.find(item => item.Name === "Mold"),
+      ragweed: airAndPollen.find(item => item.Name === "Ragweed"),
+      tree: airAndPollen.find(item => item.Name === "Tree"),
+      airQuality: airAndPollen.find(item => item.Name === "AirQuality")
+    };
+
+    res.json(pollenData);
+  } catch (error) {
+    console.error("AccuWeather Pollen API Error:", error.response?.data || error.message);
+    return res.status(error.response?.status || 500).json({
+      type: "error",
+      message: error.response?.data || error.message
+    });
+  }
+});
+
 app.listen(PORT, () => {
   console.log("Server is up on port " + PORT);
 });

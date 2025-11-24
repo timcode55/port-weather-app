@@ -112,12 +112,20 @@ let display = [];
 // GET OPEN-METEO WEATHER DATA (Free, with air quality & pollen!)
 
 async function getOpenMeteoWeather(location) {
-  await axios.get(`/weather/${location}`)
-    .then((response) => {
-      const data = response.data;
-      const weather = data.weather;
-      const airQuality = data.airQuality;
-      const pollen = data.pollen;
+  // Fetch both Open-Meteo weather data and AccuWeather pollen data
+  const [weatherResponse, pollenResponse] = await Promise.all([
+    axios.get(`/weather/${location}`),
+    axios.get(`/pollen/${location}`)
+  ]);
+
+  const data = weatherResponse.data;
+  const weather = data.weather;
+  const airQuality = data.airQuality;
+  const accuPollen = pollenResponse.data; // Real AccuWeather pollen data
+
+  // Continue processing weather data
+  (async function processWeatherData() {
+    try {
 
       const current = weather.current;
       const daily = weather.daily;
@@ -213,28 +221,23 @@ async function getOpenMeteoWeather(location) {
         return icons[code] || "fas fa-question";
       };
 
-      // AIR QUALITY DATA
-      const usAQI = airQuality.current.us_aqi || 0;
+      // AIR QUALITY DATA - Using AccuWeather data
       display.push({
-        airQuality: `${usAQI} - ${getAQICategory(usAQI)}`,
+        airQuality: `${accuPollen.airQuality.Value} - ${accuPollen.airQuality.Category}`,
       });
 
-      // POLLEN DATA (may be null depending on location/season)
-      const grassPollen = pollen.current.grass_pollen;
-      const ragweedPollen = pollen.current.ragweed_pollen;
-      const birchPollen = pollen.current.birch_pollen;
-
+      // POLLEN DATA - Real AccuWeather pollen data
       display.push({
-        grass: grassPollen !== null ? `${grassPollen} - ${getPollenLevel(grassPollen)}` : "No data available",
+        grass: `${accuPollen.grass.Value} - ${accuPollen.grass.Category}`,
       });
       display.push({
-        mold: "Not available", // Open-Meteo doesn't have mold
+        mold: `${accuPollen.mold.Value} - ${accuPollen.mold.Category}`,
       });
       display.push({
-        ragweed: ragweedPollen !== null ? `${ragweedPollen} - ${getPollenLevel(ragweedPollen)}` : "No data available",
+        ragweed: `${accuPollen.ragweed.Value} - ${accuPollen.ragweed.Category}`,
       });
       display.push({
-        tree: birchPollen !== null ? `${birchPollen} - ${getPollenLevel(birchPollen)}` : "No data available",
+        tree: `${accuPollen.tree.Value} - ${accuPollen.tree.Category}`,
       });
 
       // TEMPERATURE DATA (already in Fahrenheit from API)
@@ -315,12 +318,12 @@ async function getOpenMeteoWeather(location) {
       });
 
       temp(display);
-    })
-    .catch((error) => {
-      console.error("Error fetching Open-Meteo weather:", error);
+    } catch (error) {
+      console.error("Error fetching weather data:", error);
       console.error("Error details:", error.response?.data);
       alert(`Error: ${error.response?.data?.message || error.message}\n\nUnable to fetch weather data for this location.`);
-    });
+    }
+  })();
 }
 
 // DISPLAY DATA ON THE PAGE
