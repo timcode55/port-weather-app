@@ -271,7 +271,7 @@ async function getOpenMeteoWeather(location) {
         windSpeedDirection: `${getWindArrow(current.wind_direction_10m || 0)} ${getWindDirection(current.wind_direction_10m || 0)}`,
       });
       display.push({
-        feelsLike: Math.round(current.apparent_temperature),
+        soilTemp: Math.round(current.soil_temperature_6cm),
       });
 
       // WEATHER FORECAST
@@ -347,7 +347,7 @@ async function temp(display) {
   let humidity = document.getElementById("humidity");
   let windGust = document.getElementById("wind-gust");
   let windSpeed = document.getElementById("wind-speed");
-  let feelsLike = document.getElementById("feels-like");
+  let soilTemp = document.getElementById("soil-temp");
   let cloudCover = document.getElementById("cloud-cover");
   let forecastToday = document.getElementById("forecast-today");
   let forecastTomorrow = document.getElementById("forecast-tomorrow");
@@ -378,7 +378,7 @@ async function temp(display) {
       humidity.textContent = `${~~weatherObj["humidity"]}%`;
       windGust.innerHTML = `${weatherObj["windGustDirection"]} ${~~weatherObj["windGust"]} mph`;
       windSpeed.innerHTML = `${weatherObj["windSpeedDirection"]} ${~~weatherObj["windSpeed"]} mph`;
-      feelsLike.textContent = `${~~weatherObj["feelsLike"]}°`;
+      soilTemp.textContent = `${~~weatherObj["soilTemp"]}°`;
       cloudCover.textContent = `${~~weatherObj["cloudCover"]}%`;
       forecastToday.textContent = weatherObj["forecastToday"];
       forecastTomorrow.textContent = weatherObj["forecastTomorrow"];
