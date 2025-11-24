@@ -42,7 +42,7 @@ weatherForm.addEventListener("submit", (e) => {
       .then((response) => {
         if (!response.data.results || response.data.results.length === 0) {
           console.log("No images found for location, using default");
-          document.body.style.backgroundImage = `url('https://images.unsplash.com/photo-1583847323635-7ad5b93640ad?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=3572&q=80')`;
+          document.body.style.backgroundImage = `url('https://images.unsplash.com/photo-1583847323635-7ad5b93640ad?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=3572&q=80&nocache=${timestamp}')`;
           return;
         }
 
@@ -51,17 +51,21 @@ weatherForm.addEventListener("submit", (e) => {
         let result = response.data.results[random]?.urls.full ||
           "https://images.unsplash.com/photo-1583847323635-7ad5b93640ad?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=3572&q=80";
 
-        console.log(result, "result");
+        // Add cache-busting parameter to the image URL to force fresh load
+        const cacheBustingUrl = result + (result.includes('?') ? '&' : '?') + `nocache=${timestamp}`;
+
+        console.log(cacheBustingUrl, "result with cache busting");
         console.log(`Selected image ${random + 1} of ${response.data.results.length}`);
-        document.body.style.backgroundImage = `url('${result}')`;
+        document.body.style.backgroundImage = `url('${cacheBustingUrl}')`;
         document.body.style.backgroundSize = "cover";
         document.body.style.height = "100vh";
       })
       .catch((error) => {
         console.error("Error fetching Unsplash image:", error);
         console.error("Error response:", error.response?.data);
-        // Use default image on error
-        document.body.style.backgroundImage = `url('https://images.unsplash.com/photo-1583847323635-7ad5b93640ad?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=3572&q=80')`;
+        // Use default image on error with cache-busting
+        const timestamp = Date.now();
+        document.body.style.backgroundImage = `url('https://images.unsplash.com/photo-1583847323635-7ad5b93640ad?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=3572&q=80&nocache=${timestamp}')`;
       });
   }
 });
