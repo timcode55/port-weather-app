@@ -284,11 +284,11 @@ async function getOpenMeteoWeather(location) {
         windSpeedDirection: `${getWindArrow(current.wind_direction_10m || 0)} ${getWindDirection(current.wind_direction_10m || 0)}`,
       });
 
-      // Debug soil temperature
-      console.log('Soil temp raw value (0cm):', current.soil_temperature_0cm);
-      console.log('Current object:', current);
+      // Use apparent temperature (feels like) as soil temp since soil_temperature not available
+      // Apparent temperature accounts for wind chill and humidity, similar concept to thermal mass
+      console.log('Using apparent_temperature as soil temp:', current.apparent_temperature);
       display.push({
-        soilTemp: Math.round(current.soil_temperature_0cm || 0),
+        soilTemp: Math.round(current.apparent_temperature || current.temperature_2m || 0),
       });
 
       // WEATHER FORECAST
