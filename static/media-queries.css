@@ -163,42 +163,68 @@
 
 	/* 7-Day Forecast responsive styles for mobile */
 	.forecast-week {
-		padding: 12px;
+		padding: 15px;
 	}
 
 	.forecast-week-title {
-		font-size: 1.2rem;
-		margin-bottom: 12px;
+		font-size: 1.3rem;
+		margin-bottom: 15px;
 		letter-spacing: 1px;
 	}
 
+	.forecast-week-container {
+		flex-direction: column;
+		overflow-x: visible;
+		gap: 8px;
+	}
+
 	.forecast-day {
-		min-width: 85px;
-		padding: 10px 8px;
+		min-width: 100%;
+		width: 100%;
+		display: grid;
+		grid-template-columns: 80px 60px 1fr 100px;
+		grid-template-rows: auto auto;
+		align-items: center;
+		padding: 12px 15px;
+		text-align: left;
 	}
 
 	.forecast-day-name {
-		font-size: 0.9rem;
-		margin-bottom: 8px;
+		font-size: 1rem;
+		margin-bottom: 0;
+		grid-column: 1;
+		grid-row: 1 / 3;
+		font-weight: 500;
 	}
 
 	.forecast-day-icon {
-		font-size: 1.8rem;
-		margin: 6px 0;
+		font-size: 2.2rem;
+		margin: 0;
+		grid-column: 2;
+		grid-row: 1 / 3;
 	}
 
 	.forecast-day-temps {
-		font-size: 0.95rem;
-		margin: 8px 0;
+		font-size: 1.1rem;
+		margin: 0;
+		grid-column: 3;
+		grid-row: 1;
+		justify-content: flex-start;
 	}
 
 	.forecast-day-condition {
-		font-size: 0.75rem;
-		margin-top: 4px;
+		font-size: 0.85rem;
+		margin: 0;
+		grid-column: 3;
+		grid-row: 2;
+		opacity: 0.9;
 	}
 
 	.forecast-day-precip {
-		font-size: 0.7rem;
-		margin-top: 4px;
+		font-size: 0.85rem;
+		margin: 0;
+		grid-column: 4;
+		grid-row: 1 / 3;
+		text-align: right;
 	}
 }
