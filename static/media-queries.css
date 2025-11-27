@@ -81,6 +81,42 @@
 		justify-content: center;
 		width: 40%;
 	}
+
+	/* 7-Day Forecast responsive styles for tablet */
+	.forecast-week {
+		padding: 15px;
+	}
+
+	.forecast-week-title {
+		font-size: 1.4rem;
+		margin-bottom: 15px;
+	}
+
+	.forecast-day {
+		min-width: 100px;
+		padding: 12px;
+	}
+
+	.forecast-day-name {
+		font-size: 1rem;
+	}
+
+	.forecast-day-icon {
+		font-size: 2rem;
+		margin: 8px 0;
+	}
+
+	.forecast-day-temps {
+		font-size: 1rem;
+	}
+
+	.forecast-day-condition {
+		font-size: 0.8rem;
+	}
+
+	.forecast-day-precip {
+		font-size: 0.75rem;
+	}
 }
 
 @media only screen and (max-width: 450px) {
@@ -123,5 +159,46 @@
 		text-align: center;
 		justify-content: center;
 		width: 40%;
+	}
+
+	/* 7-Day Forecast responsive styles for mobile */
+	.forecast-week {
+		padding: 12px;
+	}
+
+	.forecast-week-title {
+		font-size: 1.2rem;
+		margin-bottom: 12px;
+		letter-spacing: 1px;
+	}
+
+	.forecast-day {
+		min-width: 85px;
+		padding: 10px 8px;
+	}
+
+	.forecast-day-name {
+		font-size: 0.9rem;
+		margin-bottom: 8px;
+	}
+
+	.forecast-day-icon {
+		font-size: 1.8rem;
+		margin: 6px 0;
+	}
+
+	.forecast-day-temps {
+		font-size: 0.95rem;
+		margin: 8px 0;
+	}
+
+	.forecast-day-condition {
+		font-size: 0.75rem;
+		margin-top: 4px;
+	}
+
+	.forecast-day-precip {
+		font-size: 0.7rem;
+		margin-top: 4px;
 	}
 }
