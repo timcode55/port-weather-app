@@ -285,10 +285,10 @@ async function getOpenMeteoWeather(location) {
       });
 
       // Debug soil temperature
-      console.log('Soil temp raw value:', current.soil_temperature_6cm);
+      console.log('Soil temp raw value (0cm):', current.soil_temperature_0cm);
       console.log('Current object:', current);
       display.push({
-        soilTemp: Math.round(current.soil_temperature_6cm || 0),
+        soilTemp: Math.round(current.soil_temperature_0cm || 0),
       });
 
       // WEATHER FORECAST
