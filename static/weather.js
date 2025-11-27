@@ -16,13 +16,19 @@ const search = document.querySelector("input");
 weatherForm.addEventListener("submit", (e) => {
   e.preventDefault();
 
-  // Immediately hide all data when searching for a new city
-  let toggle = document.querySelectorAll(".hidden, .container > div:not(.hidden)");
-  toggle.forEach((item) => {
-    if (!item.classList.contains("hidden")) {
-      item.classList.add("hidden");
-    }
+  // Fade out the data values (not the entire grid) when searching
+  const dataElements = document.querySelectorAll(".container h2, .container p:not(:first-child), #weather-icon");
+  dataElements.forEach((el) => {
+    el.style.opacity = "0";
+    el.style.transition = "opacity 0.3s ease";
   });
+
+  // Also fade out 7-day forecast
+  const forecastWeek = document.querySelector(".forecast-week");
+  if (forecastWeek) {
+    forecastWeek.style.opacity = "0";
+    forecastWeek.style.transition = "opacity 0.3s ease";
+  }
 
   display = [];
   const location = search.value;
@@ -280,7 +286,7 @@ async function getOpenMeteoWeather(location) {
         windSpeedDirection: `${getWindArrow(current.wind_direction_10m || 0)} ${getWindDirection(current.wind_direction_10m || 0)}`,
       });
       display.push({
-        soilTemp: Math.round(current.soil_temperature_6cm),
+        soilTemp: Math.round(current.soil_temperature_6cm || 0),
       });
 
       // WEATHER FORECAST
@@ -341,9 +347,10 @@ async function getOpenMeteoWeather(location) {
 // DISPLAY DATA ON THE PAGE
 
 async function temp(display) {
+  // Show grid if it's hidden (first load)
   let toggle = document.querySelectorAll(".hidden");
   toggle.forEach((item) => {
-    item.classList.toggle("hidden");
+    item.classList.remove("hidden");
   });
 
   let tempMin = document.getElementById("temp-min");
@@ -402,7 +409,19 @@ async function temp(display) {
       if (weatherObj["weatherIcon"]) {
         weatherIcon.innerHTML = `<i class="${weatherObj["weatherIcon"]}"></i>`;
       }
-    }, 1500);
+
+      // Fade data back in
+      const dataElements = document.querySelectorAll(".container h2, .container p:not(:first-child), #weather-icon");
+      dataElements.forEach((el) => {
+        el.style.opacity = "1";
+      });
+
+      // Fade 7-day forecast back in
+      const forecastWeek = document.querySelector(".forecast-week");
+      if (forecastWeek) {
+        forecastWeek.style.opacity = "1";
+      }
+    }, 500);
   };
   delayDisplay();
 }
