@@ -283,6 +283,10 @@ async function getOpenMeteoWeather(location) {
       display.push({
         windSpeedDirection: `${getWindArrow(current.wind_direction_10m || 0)} ${getWindDirection(current.wind_direction_10m || 0)}`,
       });
+
+      // Debug soil temperature
+      console.log('Soil temp raw value:', current.soil_temperature_6cm);
+      console.log('Current object:', current);
       display.push({
         soilTemp: Math.round(current.soil_temperature_6cm || 0),
       });
