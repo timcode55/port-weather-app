@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-Z8R54P30JY"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "G-Z8R54P30JY");
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css"
+    />
+    <link rel="icon" type="image/png" href="./images/favicon2.png" />
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./day-detail.css" />
+    <link rel="stylesheet" href="./media-queries.css" />
+    <title>24-Hour Forecast</title>
+  </head>
+  <body>
+    <div class="detail-container">
+      <header class="detail-header">
+        <button class="back-button" onclick="window.history.back()">
+          <i class="fas fa-arrow-left"></i> Back
+        </button>
+        <div class="title-with-nav">
+          <button class="nav-arrow" id="prev-day" title="Previous day">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <h1 class="detail-title" id="detail-title">Loading...</h1>
+          <button class="nav-arrow" id="next-day" title="Next day">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </header>
+
+      <div class="detail-content">
+        <div class="detail-summary">
+          <div class="summary-card bg1">
+            <h2 id="day-high-low"></h2>
+            <p>High / Low</p>
+          </div>
+          <div class="summary-card bg2">
+            <h2 id="day-condition"></h2>
+            <p>Conditions</p>
+          </div>
+          <div class="summary-card bg1">
+            <h2 id="day-precipitation"></h2>
+            <p>Precipitation</p>
+          </div>
+          <div class="summary-card bg2">
+            <h2 id="day-wind"></h2>
+            <p>Max Wind</p>
+          </div>
+        </div>
+
+        <div class="chart-section">
+          <div class="chart-container bg1">
+            <h3>24-Hour Precipitation</h3>
+            <canvas id="precipitation-chart"></canvas>
+          </div>
+
+          <div class="chart-container bg2">
+            <h3>24-Hour Wind Speed</h3>
+            <canvas id="wind-chart"></canvas>
+          </div>
+
+          <div class="chart-container bg1">
+            <h3>24-Hour Cloud Cover</h3>
+            <canvas id="cloud-chart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="./day-detail.js"></script>
+  </body>
+</html>

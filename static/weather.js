@@ -13,6 +13,32 @@ const messageTwo = document.querySelector("#message-two");
 const weatherForm = document.querySelector("form");
 const search = document.querySelector("input");
 
+// Global variables to store current location and background URL for detail page
+let currentLocation = "";
+let currentBackgroundUrl = urlBackground;
+
+// Restore cached data on page load (for back button navigation)
+window.addEventListener('DOMContentLoaded', () => {
+  const cachedLocation = sessionStorage.getItem('weatherLocation');
+  const cachedBackground = sessionStorage.getItem('weatherBackground');
+
+  if (cachedLocation && window.performance && window.performance.navigation.type === 2) {
+    // User came back via back button (navigation type 2)
+    console.log('Restoring cached weather data for:', cachedLocation);
+    currentLocation = cachedLocation;
+    if (cachedBackground) {
+      currentBackgroundUrl = cachedBackground;
+      document.body.style.backgroundImage = `url('${cachedBackground}')`;
+    }
+
+    // Trigger weather fetch to restore data
+    let editTitle = document.querySelector(".title");
+    editTitle.classList.add("background-title");
+    editTitle.innerHTML = `${cachedLocation} local weather`;
+    getOpenMeteoWeather(cachedLocation);
+  }
+});
+
 weatherForm.addEventListener("submit", (e) => {
   e.preventDefault();
 
@@ -37,6 +63,11 @@ weatherForm.addEventListener("submit", (e) => {
 
   display = [];
   const location = search.value;
+  currentLocation = location; // Store current location globally
+
+  // Save location to sessionStorage for back button restoration
+  sessionStorage.setItem('weatherLocation', location);
+
   getOpenMeteoWeather(location);
   search.value = "";
   const randomPage = Math.floor(Math.random() * 10);
@@ -92,6 +123,12 @@ weatherForm.addEventListener("submit", (e) => {
     // Add additional random parameter to force unique URL
     const uniqueParam = Math.random().toString(36).substring(7);
     const finalUrl = imageUrl + (imageUrl.includes('?') ? '&' : '?') + `cache=${uniqueParam}`;
+
+    // Store the background URL globally for detail page
+    currentBackgroundUrl = finalUrl;
+
+    // Save background to sessionStorage for back button restoration
+    sessionStorage.setItem('weatherBackground', finalUrl);
 
     // Set background immediately without waiting for preload
     document.body.style.backgroundImage = `url('${finalUrl}')`;
@@ -253,12 +290,32 @@ async function getOpenMeteoWeather(location) {
         tree: `${accuPollen.tree.Value} - ${accuPollen.tree.Category}`,
       });
 
+      // Find today's and tomorrow's indices (skip past days)
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      let todayIndex = 0;
+      let tomorrowIndex = 1;
+
+      for (let i = 0; i < daily.time.length; i++) {
+        const date = new Date(daily.time[i]);
+        date.setHours(0, 0, 0, 0);
+        if (date.getTime() === today.getTime()) {
+          todayIndex = i;
+        }
+        if (date.getTime() === tomorrow.getTime()) {
+          tomorrowIndex = i;
+        }
+      }
+
       // TEMPERATURE DATA (already in Fahrenheit from API)
       display.push({
-        minTemp: Math.round(daily.temperature_2m_min[0]),
+        minTemp: Math.round(daily.temperature_2m_min[todayIndex]),
       });
       display.push({
-        maxTemp: Math.round(daily.temperature_2m_max[0]),
+        maxTemp: Math.round(daily.temperature_2m_max[todayIndex]),
       });
       display.push({
         currentTemp: `${Math.round(current.temperature_2m)}`,
@@ -293,16 +350,16 @@ async function getOpenMeteoWeather(location) {
 
       // WEATHER FORECAST
       display.push({
-        forecastToday: getWeatherDescription(daily.weather_code[0]),
+        forecastToday: getWeatherDescription(daily.weather_code[todayIndex]),
       });
       display.push({
-        weatherIcon: getWeatherIcon(daily.weather_code[0]),
+        weatherIcon: getWeatherIcon(daily.weather_code[todayIndex]),
       });
 
       // Tomorrow's forecast
-      if (daily.weather_code.length > 1) {
+      if (daily.weather_code.length > tomorrowIndex) {
         display.push({
-          forecastTomorrow: `${getWeatherDescription(daily.weather_code[1])} - Low: ${Math.round(daily.temperature_2m_min[1])}°F, High: ${Math.round(daily.temperature_2m_max[1])}°F`,
+          forecastTomorrow: `${getWeatherDescription(daily.weather_code[tomorrowIndex])} - Low: ${Math.round(daily.temperature_2m_min[tomorrowIndex])}°F, High: ${Math.round(daily.temperature_2m_max[tomorrowIndex])}°F`,
         });
       } else {
         display.push({
@@ -312,10 +369,10 @@ async function getOpenMeteoWeather(location) {
 
       // SUNRISE/SUNSET
       display.push({
-        sunrise: new Date(daily.sunrise[0]).toLocaleString(),
+        sunrise: new Date(daily.sunrise[todayIndex]).toLocaleString(),
       });
       display.push({
-        sunset: new Date(daily.sunset[0]).toLocaleString(),
+        sunset: new Date(daily.sunset[todayIndex]).toLocaleString(),
       });
 
       // OTHER CONDITIONS
@@ -455,11 +512,39 @@ function displayWeekForecast(daily, getWeatherIcon, getWeatherDescription) {
   forecastContainer.innerHTML = ''; // Clear previous forecast
 
   const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Reset time to compare dates only
 
-  // Display 7 days
-  for (let i = 0; i < 7; i++) {
+  let daysDisplayed = 0;
+  let startIndex = 0;
+
+  // Find the starting index (skip past days)
+  for (let i = 0; i < daily.time.length; i++) {
     const date = new Date(daily.time[i]);
-    const dayName = i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : daysOfWeek[date.getDay()];
+    date.setHours(0, 0, 0, 0);
+    if (date.getTime() >= today.getTime()) {
+      startIndex = i;
+      break;
+    }
+  }
+
+  // Display 7 days starting from today
+  for (let i = startIndex; i < daily.time.length && daysDisplayed < 7; i++) {
+    const date = new Date(daily.time[i]);
+    date.setHours(0, 0, 0, 0); // Reset time to compare dates only
+
+    // Check if this date is today or tomorrow by comparing actual dates
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    let dayName;
+    if (date.getTime() === today.getTime()) {
+      dayName = 'Today';
+    } else if (date.getTime() === tomorrow.getTime()) {
+      dayName = 'Tomorrow';
+    } else {
+      dayName = daysOfWeek[date.getDay()];
+    }
 
     const highTemp = Math.round(daily.temperature_2m_max[i]);
     const lowTemp = Math.round(daily.temperature_2m_min[i]);
@@ -489,6 +574,18 @@ function displayWeekForecast(daily, getWeatherIcon, getWeatherDescription) {
       <div class="forecast-day-condition">${description}</div>
       ${precipHtml}
     `;
+
+    // Add click handler to navigate to detail page
+    // Store current daysDisplayed value for this specific card
+    const currentDayIndex = daysDisplayed;
+    dayCard.style.cursor = 'pointer';
+    dayCard.addEventListener('click', () => {
+      const encodedLocation = encodeURIComponent(currentLocation);
+      const encodedBg = encodeURIComponent(currentBackgroundUrl);
+      window.location.href = `./day-detail.html?day=${currentDayIndex}&location=${encodedLocation}&bg=${encodedBg}`;
+    });
+
+    daysDisplayed++;
 
     forecastContainer.appendChild(dayCard);
   }
