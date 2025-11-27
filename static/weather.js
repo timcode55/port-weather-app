@@ -87,33 +87,21 @@ weatherForm.addEventListener("submit", (e) => {
       });
   }
 
-  // Helper function to preload image and set as background
+  // Helper function to set background immediately (no preload)
   function preloadAndSetBackground(imageUrl) {
     // Add additional random parameter to force unique URL
     const uniqueParam = Math.random().toString(36).substring(7);
     const finalUrl = imageUrl + (imageUrl.includes('?') ? '&' : '?') + `cache=${uniqueParam}`;
 
-    const img = new Image();
-    img.onload = function() {
-      document.body.style.backgroundImage = `url('${finalUrl}')`;
-      document.body.style.backgroundSize = "cover";
-      document.body.style.minHeight = "100vh";
-      document.body.style.backgroundAttachment = "fixed";
-      document.body.style.backgroundPosition = "center";
-      document.body.style.backgroundRepeat = "no-repeat";
-      console.log("Background image loaded successfully");
-    };
-    img.onerror = function() {
-      console.error("Failed to load image:", finalUrl);
-      // Still set it as background even if preload fails
-      document.body.style.backgroundImage = `url('${finalUrl}')`;
-      document.body.style.backgroundSize = "cover";
-      document.body.style.minHeight = "100vh";
-      document.body.style.backgroundAttachment = "fixed";
-      document.body.style.backgroundPosition = "center";
-      document.body.style.backgroundRepeat = "no-repeat";
-    };
-    img.src = finalUrl;
+    // Set background immediately without waiting for preload
+    document.body.style.backgroundImage = `url('${finalUrl}')`;
+    document.body.style.backgroundSize = "cover";
+    document.body.style.minHeight = "100vh";
+    document.body.style.backgroundAttachment = "fixed";
+    document.body.style.backgroundPosition = "center";
+    document.body.style.backgroundRepeat = "no-repeat";
+
+    console.log("Background image set:", finalUrl);
   }
 });
 
