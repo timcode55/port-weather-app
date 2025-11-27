@@ -16,18 +16,23 @@ const search = document.querySelector("input");
 weatherForm.addEventListener("submit", (e) => {
   e.preventDefault();
 
-  // Fade out the data values (not the entire grid) when searching
-  const dataElements = document.querySelectorAll(".container h2, .container p:not(:first-child), #weather-icon");
+  // Fade out only the data values (not labels) when searching
+  const dataElements = document.querySelectorAll(
+    "#temp-min, #temp-max, #week-summary, #air-quality, #cloud-cover, " +
+    "#forecast-today, #forecast-tomorrow, #tree, #ragweed, #mold, #grass, " +
+    "#current-temp, #humidity, #sunrise, #sunset, #wind-speed, #wind-gust, " +
+    "#soil-temp, #uvIndex, #precipitation, #weather-icon"
+  );
   dataElements.forEach((el) => {
     el.style.opacity = "0";
     el.style.transition = "opacity 0.3s ease";
   });
 
-  // Also fade out 7-day forecast
-  const forecastWeek = document.querySelector(".forecast-week");
-  if (forecastWeek) {
-    forecastWeek.style.opacity = "0";
-    forecastWeek.style.transition = "opacity 0.3s ease";
+  // Also fade out 7-day forecast content
+  const forecastContainer = document.querySelector("#forecast-week");
+  if (forecastContainer) {
+    forecastContainer.style.opacity = "0";
+    forecastContainer.style.transition = "opacity 0.3s ease";
   }
 
   display = [];
@@ -84,26 +89,31 @@ weatherForm.addEventListener("submit", (e) => {
 
   // Helper function to preload image and set as background
   function preloadAndSetBackground(imageUrl) {
+    // Add additional random parameter to force unique URL
+    const uniqueParam = Math.random().toString(36).substring(7);
+    const finalUrl = imageUrl + (imageUrl.includes('?') ? '&' : '?') + `cache=${uniqueParam}`;
+
     const img = new Image();
     img.onload = function() {
-      document.body.style.backgroundImage = `url('${imageUrl}')`;
+      document.body.style.backgroundImage = `url('${finalUrl}')`;
       document.body.style.backgroundSize = "cover";
       document.body.style.minHeight = "100vh";
       document.body.style.backgroundAttachment = "fixed";
       document.body.style.backgroundPosition = "center";
       document.body.style.backgroundRepeat = "no-repeat";
+      console.log("Background image loaded successfully");
     };
     img.onerror = function() {
-      console.error("Failed to load image:", imageUrl);
+      console.error("Failed to load image:", finalUrl);
       // Still set it as background even if preload fails
-      document.body.style.backgroundImage = `url('${imageUrl}')`;
+      document.body.style.backgroundImage = `url('${finalUrl}')`;
       document.body.style.backgroundSize = "cover";
       document.body.style.minHeight = "100vh";
       document.body.style.backgroundAttachment = "fixed";
       document.body.style.backgroundPosition = "center";
       document.body.style.backgroundRepeat = "no-repeat";
     };
-    img.src = imageUrl;
+    img.src = finalUrl;
   }
 });
 
@@ -411,15 +421,20 @@ async function temp(display) {
       }
 
       // Fade data back in
-      const dataElements = document.querySelectorAll(".container h2, .container p:not(:first-child), #weather-icon");
+      const dataElements = document.querySelectorAll(
+        "#temp-min, #temp-max, #week-summary, #air-quality, #cloud-cover, " +
+        "#forecast-today, #forecast-tomorrow, #tree, #ragweed, #mold, #grass, " +
+        "#current-temp, #humidity, #sunrise, #sunset, #wind-speed, #wind-gust, " +
+        "#soil-temp, #uvIndex, #precipitation, #weather-icon"
+      );
       dataElements.forEach((el) => {
         el.style.opacity = "1";
       });
 
-      // Fade 7-day forecast back in
-      const forecastWeek = document.querySelector(".forecast-week");
-      if (forecastWeek) {
-        forecastWeek.style.opacity = "1";
+      // Fade 7-day forecast content back in
+      const forecastContainer = document.querySelector("#forecast-week");
+      if (forecastContainer) {
+        forecastContainer.style.opacity = "1";
       }
     }, 500);
   };
