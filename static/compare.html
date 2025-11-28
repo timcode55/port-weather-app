@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css"
+    />
+    <link rel="icon" type="image/png" href="./images/favicon2.png" />
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./compare.css" />
+    <title>Weather API Comparison</title>
+  </head>
+  <body>
+    <div class="compare-container">
+      <header class="compare-header">
+        <button class="back-button" onclick="window.location.href='./index.html'">
+          <i class="fas fa-arrow-left"></i> Back to Main
+        </button>
+        <h1 class="compare-title">Weather API Accuracy Comparison</h1>
+      </header>
+
+      <div class="search-section">
+        <form class="compare-form" id="compare-form">
+          <input
+            type="search"
+            class="compare-search"
+            id="location-input"
+            placeholder="Enter a location to compare"
+          />
+          <input type="submit" class="compare-submit" value="Compare" />
+        </form>
+      </div>
+
+      <div class="comparison-content" id="comparison-content">
+        <p class="instruction-text">Enter a location above to compare weather data from different sources</p>
+      </div>
+
+      <div class="info-section">
+        <h2>About the Data Sources</h2>
+        <div class="info-grid">
+          <div class="info-card">
+            <h3>Open-Meteo (Free)</h3>
+            <p><strong>Data Sources:</strong></p>
+            <ul>
+              <li>NOAA GFS (USA)</li>
+              <li>DWD ICON (Germany)</li>
+              <li>ECMWF IFS (Europe)</li>
+              <li>Met Office (UK)</li>
+            </ul>
+            <p><strong>Strengths:</strong> Uses official government weather models, transparent data sources, hourly updates</p>
+          </div>
+
+          <div class="info-card">
+            <h3>AccuWeather (Paid)</h3>
+            <p><strong>Data Sources:</strong></p>
+            <ul>
+              <li>Same government models as above</li>
+              <li>Proprietary algorithms</li>
+              <li>Local weather station data</li>
+              <li>Crowdsourced observations</li>
+            </ul>
+            <p><strong>Strengths:</strong> Additional local adjustments, MinuteCast for precipitation, established brand</p>
+          </div>
+
+          <div class="info-card">
+            <h3>National Weather Service (Baseline)</h3>
+            <p><strong>Data Sources:</strong></p>
+            <ul>
+              <li>Direct NOAA/NWS data</li>
+              <li>Official US government forecasts</li>
+              <li>No commercial processing</li>
+            </ul>
+            <p><strong>Strengths:</strong> Most authoritative for US locations, free, no bias</p>
+            <p><strong>Note:</strong> This would be the "ground truth" for US locations</p>
+          </div>
+        </div>
+
+        <div class="accuracy-info">
+          <h2>Typical Forecast Accuracy</h2>
+          <p>Based on independent studies:</p>
+          <ul>
+            <li><strong>24-hour forecasts:</strong> 85-95% accurate for temperature (±3°F), 70-80% for precipitation</li>
+            <li><strong>3-day forecasts:</strong> 75-85% accurate for temperature, 60-70% for precipitation</li>
+            <li><strong>7-day forecasts:</strong> 60-70% accurate for temperature, 50% for precipitation</li>
+          </ul>
+          <p><strong>Key insight:</strong> Most commercial weather services (AccuWeather, Weather.com, etc.) use the same underlying government models. Differences come from:</p>
+          <ul>
+            <li>How they interpret and blend multiple models</li>
+            <li>Local adjustments from weather stations</li>
+            <li>Proprietary algorithms for specific predictions (like precipitation timing)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <script src="./compare.js"></script>
+  </body>
+</html>

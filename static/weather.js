@@ -383,12 +383,10 @@ async function getOpenMeteoWeather(location) {
         uvIndex: `${daily.uv_index_max?.[0] || 0}`,
       });
 
-      // Debug precipitation
-      console.log('Precipitation raw value:', daily.precipitation_sum?.[0]);
-      console.log('Daily object:', daily);
-      const precipValue = daily.precipitation_sum?.[0];
+      // Precipitation probability (chance of rain)
+      const precipProb = daily.precipitation_probability_max?.[todayIndex] || 0;
       display.push({
-        precipitation: precipValue !== undefined && precipValue !== null ? precipValue.toFixed(2) : '0.00',
+        precipitation: precipProb > 0 ? `${precipProb}% chance` : 'No rain expected',
       });
 
       temp(display);
@@ -443,8 +441,8 @@ async function temp(display) {
           weatherObj[item] = display[i][item];
         }
       }
-      tempMin.textContent = `${~~weatherObj["minTemp"]}°`;
-      tempMax.textContent = `${~~weatherObj["maxTemp"]}°`;
+      tempMin.querySelector('span').textContent = `${~~weatherObj["minTemp"]}°`;
+      tempMax.querySelector('span').textContent = `${~~weatherObj["maxTemp"]}°`;
       weekSummary.textContent = weatherObj["weekSummary"];
       airQuality.textContent = weatherObj["airQuality"];
       grass.textContent = weatherObj["grass"];
@@ -462,7 +460,7 @@ async function temp(display) {
       forecastTomorrow.textContent = weatherObj["forecastTomorrow"];
       currentTemp.textContent = `${~~weatherObj["currentTemp"]}°`;
       uvIndex.textContent = weatherObj["uvIndex"];
-      precipitation.textContent = `${weatherObj["precipitation"]}"`;
+      precipitation.textContent = weatherObj["precipitation"];
 
       // Update weather icon
       if (weatherObj["weatherIcon"]) {

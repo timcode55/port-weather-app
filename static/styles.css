@@ -380,3 +380,53 @@ p {
 	color: #2c5aa0;
 	font-weight: 400;
 }
+
+/* Temperature Section Styles */
+#temp-section {
+	padding: 20px;
+}
+
+.temp-display {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 15px;
+}
+
+.temp-item {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.temp-label {
+	font-size: 1rem;
+	font-weight: 400;
+	color: #fff;
+	margin-bottom: 5px;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	opacity: 0.9;
+}
+
+.temp-item h2 {
+	margin: 0;
+}
+
+.temp-item h2 span {
+	font-size: 2rem;
+	font-weight: 300;
+}
+
+.temp-divider {
+	font-size: 2rem;
+	color: #fff;
+	opacity: 0.6;
+	font-weight: 300;
+}
+
+.temp-subtitle {
+	margin-top: 10px;
+	font-size: 1.2rem;
+	opacity: 0.8;
+}

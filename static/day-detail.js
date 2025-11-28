@@ -15,6 +15,7 @@ document.body.style.backgroundRepeat = "no-repeat";
 let precipChart = null;
 let windChart = null;
 let cloudChart = null;
+let temperatureChart = null;
 
 // Fetch hourly data for the specific day
 async function loadDayDetail(currentDayIndex) {
@@ -71,6 +72,7 @@ async function loadDayDetail(currentDayIndex) {
     const precipData = [];
     const windData = [];
     const cloudData = [];
+    const tempData = [];
 
     for (let i = startHour; i < endHour && i < hourly.time.length; i++) {
       const time = new Date(hourly.time[i]);
@@ -78,17 +80,20 @@ async function loadDayDetail(currentDayIndex) {
       precipData.push(hourly.precipitation[i] || 0);
       windData.push(Math.round(hourly.wind_speed_10m[i] || 0));
       cloudData.push(hourly.cloud_cover[i] || 0);
+      tempData.push(Math.round(hourly.temperature_2m[i] || 0));
     }
 
     // Destroy existing charts before creating new ones
     if (precipChart) precipChart.destroy();
     if (windChart) windChart.destroy();
     if (cloudChart) cloudChart.destroy();
+    if (temperatureChart) temperatureChart.destroy();
 
     // Create charts
     precipChart = createPrecipitationChart(hours, precipData);
     windChart = createWindChart(hours, windData);
     cloudChart = createCloudChart(hours, cloudData);
+    temperatureChart = createTemperatureChart(hours, tempData);
 
     // Update navigation buttons
     updateNavigationButtons();
@@ -326,6 +331,57 @@ document.addEventListener('keydown', (e) => {
     loadDayDetail(dayIndex + 1);
   }
 });
+
+function createTemperatureChart(labels, data) {
+  const ctx = document.getElementById('temperature-chart').getContext('2d');
+  return new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Temperature (°F)',
+        data: data,
+        backgroundColor: 'rgba(220, 100, 50, 0.2)',
+        borderColor: 'rgba(180, 70, 30, 1)',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: {
+          labels: {
+            color: '#000',
+            font: {
+              size: 14
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          ticks: {
+            color: '#000'
+          },
+          grid: {
+            color: 'rgba(0, 0, 0, 0.1)'
+          }
+        },
+        x: {
+          ticks: {
+            color: '#000'
+          },
+          grid: {
+            color: 'rgba(0, 0, 0, 0.1)'
+          }
+        }
+      }
+    }
+  });
+}
 
 // Load data when page loads
 loadDayDetail();

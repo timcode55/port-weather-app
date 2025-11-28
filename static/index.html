@@ -56,12 +56,19 @@
 
       <!-- new content -->
       <div class="container">
-        <div class="bg1 hidden">
-          <h2>
-            <span id="temp-min"> </span> <span>| </span
-            ><span id="temp-max"> </span>
-          </h2>
-          <p id="week-summary">Local Weather</p>
+        <div class="bg1 hidden" id="temp-section">
+          <div class="temp-display">
+            <div class="temp-item">
+              <p class="temp-label">Low</p>
+              <h2 id="temp-min"><span></span></h2>
+            </div>
+            <span class="temp-divider">|</span>
+            <div class="temp-item">
+              <p class="temp-label">High</p>
+              <h2 id="temp-max"><span></span></h2>
+            </div>
+          </div>
+          <p id="week-summary" class="temp-subtitle">Local Weather</p>
         </div>
         <div class="bg1 hidden">
           <!-- <h2><i class="fas fa-battery-three-quarters"></i></h2> -->
