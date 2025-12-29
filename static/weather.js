@@ -162,243 +162,252 @@ let display = [];
 // GET OPEN-METEO WEATHER DATA (Free, with air quality & pollen!)
 
 async function getOpenMeteoWeather(location) {
-  // Fetch both Open-Meteo weather data and AccuWeather pollen data
-  const [weatherResponse, pollenResponse] = await Promise.all([
-    axios.get(`/weather/${location}`),
-    axios.get(`/pollen/${location}`)
-  ]);
+  try {
+    // Fetch weather data (required) and pollen data (optional)
+    const weatherResponse = await axios.get(`/weather/${location}`);
 
-  const data = weatherResponse.data;
-  const weather = data.weather;
-  const airQuality = data.airQuality;
-  const accuPollen = pollenResponse.data; // Real AccuWeather pollen data
-
-  // Continue processing weather data
-  (async function processWeatherData() {
+    // Try to fetch pollen data, but don't fail if it's unavailable
+    let accuPollen = null;
     try {
+      const pollenResponse = await axios.get(`/pollen/${location}`);
+      accuPollen = pollenResponse.data;
+    } catch (pollenError) {
+      console.warn("Pollen data unavailable:", pollenError.response?.data?.message || pollenError.message);
+      // Use fallback pollen data
+      accuPollen = {
+        airQuality: { Value: 0, Category: "Not available" },
+        grass: { Value: 0, Category: "Not available" },
+        mold: { Value: 0, Category: "Not available" },
+        ragweed: { Value: 0, Category: "Not available" },
+        tree: { Value: 0, Category: "Not available" }
+      };
+    }
 
-      const current = weather.current;
-      const daily = weather.daily;
+    const data = weatherResponse.data;
+    const weather = data.weather;
+    const airQuality = data.airQuality;
 
-      // Helper functions
-      const getAQICategory = (aqi) => {
+    const current = weather.current;
+    const daily = weather.daily;
+
+    // Helper functions
+    const getAQICategory = (aqi) => {
         if (aqi <= 50) return "Good";
         if (aqi <= 100) return "Moderate";
         if (aqi <= 150) return "Unhealthy for Sensitive Groups";
         if (aqi <= 200) return "Unhealthy";
         if (aqi <= 300) return "Very Unhealthy";
         return "Hazardous";
+    };
+
+    const getPollenLevel = (value) => {
+      if (value === 0) return "None";
+      if (value <= 10) return "Low";
+      if (value <= 50) return "Medium";
+      if (value <= 100) return "High";
+      return "Very High";
+    };
+
+    const getWindDirection = (degrees) => {
+      const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+      return directions[Math.round(degrees / 45) % 8];
+    };
+
+    const getWindArrow = (degrees) => {
+      // Returns a rotated arrow icon based on wind direction
+      // Wind direction is "from" direction, so arrow points opposite way
+      const rotation = (degrees + 180) % 360;
+      return `<i class="fas fa-long-arrow-alt-up" style="transform: rotate(${rotation}deg); display: inline-block;"></i>`;
+    };
+
+    const getWeatherDescription = (code) => {
+      const descriptions = {
+        0: "Clear sky",
+        1: "Mainly clear",
+        2: "Partly cloudy",
+        3: "Overcast",
+        45: "Foggy",
+        48: "Depositing rime fog",
+        51: "Light drizzle",
+        53: "Moderate drizzle",
+        55: "Dense drizzle",
+        61: "Slight rain",
+        63: "Moderate rain",
+        65: "Heavy rain",
+        71: "Slight snow",
+        73: "Moderate snow",
+        75: "Heavy snow",
+        77: "Snow grains",
+        80: "Slight rain showers",
+        81: "Moderate rain showers",
+        82: "Violent rain showers",
+        85: "Slight snow showers",
+        86: "Heavy snow showers",
+        95: "Thunderstorm",
+        96: "Thunderstorm with slight hail",
+        99: "Thunderstorm with heavy hail"
       };
+      return descriptions[code] || "Unknown";
+    };
 
-      const getPollenLevel = (value) => {
-        if (value === 0) return "None";
-        if (value <= 10) return "Low";
-        if (value <= 50) return "Medium";
-        if (value <= 100) return "High";
-        return "Very High";
+    const getWeatherIcon = (code) => {
+      // Map weather codes to Font Awesome icons
+      const icons = {
+        0: "fas fa-sun",                    // Clear sky
+        1: "fas fa-sun",                    // Mainly clear
+        2: "fas fa-cloud-sun",              // Partly cloudy
+        3: "fas fa-cloud",                  // Overcast
+        45: "fas fa-smog",                  // Foggy
+        48: "fas fa-smog",                  // Depositing rime fog
+        51: "fas fa-cloud-rain",            // Light drizzle
+        53: "fas fa-cloud-rain",            // Moderate drizzle
+        55: "fas fa-cloud-showers-heavy",   // Dense drizzle
+        61: "fas fa-cloud-rain",            // Slight rain
+        63: "fas fa-cloud-showers-heavy",   // Moderate rain
+        65: "fas fa-cloud-showers-heavy",   // Heavy rain
+        71: "fas fa-snowflake",             // Slight snow
+        73: "fas fa-snowflake",             // Moderate snow
+        75: "fas fa-snowflake",             // Heavy snow
+        77: "fas fa-snowflake",             // Snow grains
+        80: "fas fa-cloud-rain",            // Slight rain showers
+        81: "fas fa-cloud-showers-heavy",   // Moderate rain showers
+        82: "fas fa-cloud-showers-heavy",   // Violent rain showers
+        85: "fas fa-snowflake",             // Slight snow showers
+        86: "fas fa-snowflake",             // Heavy snow showers
+        95: "fas fa-bolt",                  // Thunderstorm
+        96: "fas fa-bolt",                  // Thunderstorm with slight hail
+        99: "fas fa-bolt"                   // Thunderstorm with heavy hail
       };
+      return icons[code] || "fas fa-question";
+    };
 
-      const getWindDirection = (degrees) => {
-        const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
-        return directions[Math.round(degrees / 45) % 8];
-      };
+    // AIR QUALITY DATA - Using AccuWeather data
+    display.push({
+      airQuality: `${accuPollen.airQuality.Value} - ${accuPollen.airQuality.Category}`,
+    });
 
-      const getWindArrow = (degrees) => {
-        // Returns a rotated arrow icon based on wind direction
-        // Wind direction is "from" direction, so arrow points opposite way
-        const rotation = (degrees + 180) % 360;
-        return `<i class="fas fa-long-arrow-alt-up" style="transform: rotate(${rotation}deg); display: inline-block;"></i>`;
-      };
+    // POLLEN DATA - Real AccuWeather pollen data
+    display.push({
+      grass: `${accuPollen.grass.Value} - ${accuPollen.grass.Category}`,
+    });
+    display.push({
+      mold: `${accuPollen.mold.Value} - ${accuPollen.mold.Category}`,
+    });
+    display.push({
+      ragweed: `${accuPollen.ragweed.Value} - ${accuPollen.ragweed.Category}`,
+    });
+    display.push({
+      tree: `${accuPollen.tree.Value} - ${accuPollen.tree.Category}`,
+    });
 
-      const getWeatherDescription = (code) => {
-        const descriptions = {
-          0: "Clear sky",
-          1: "Mainly clear",
-          2: "Partly cloudy",
-          3: "Overcast",
-          45: "Foggy",
-          48: "Depositing rime fog",
-          51: "Light drizzle",
-          53: "Moderate drizzle",
-          55: "Dense drizzle",
-          61: "Slight rain",
-          63: "Moderate rain",
-          65: "Heavy rain",
-          71: "Slight snow",
-          73: "Moderate snow",
-          75: "Heavy snow",
-          77: "Snow grains",
-          80: "Slight rain showers",
-          81: "Moderate rain showers",
-          82: "Violent rain showers",
-          85: "Slight snow showers",
-          86: "Heavy snow showers",
-          95: "Thunderstorm",
-          96: "Thunderstorm with slight hail",
-          99: "Thunderstorm with heavy hail"
-        };
-        return descriptions[code] || "Unknown";
-      };
+    // Find today's and tomorrow's indices (skip past days)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
-      const getWeatherIcon = (code) => {
-        // Map weather codes to Font Awesome icons
-        const icons = {
-          0: "fas fa-sun",                    // Clear sky
-          1: "fas fa-sun",                    // Mainly clear
-          2: "fas fa-cloud-sun",              // Partly cloudy
-          3: "fas fa-cloud",                  // Overcast
-          45: "fas fa-smog",                  // Foggy
-          48: "fas fa-smog",                  // Depositing rime fog
-          51: "fas fa-cloud-rain",            // Light drizzle
-          53: "fas fa-cloud-rain",            // Moderate drizzle
-          55: "fas fa-cloud-showers-heavy",   // Dense drizzle
-          61: "fas fa-cloud-rain",            // Slight rain
-          63: "fas fa-cloud-showers-heavy",   // Moderate rain
-          65: "fas fa-cloud-showers-heavy",   // Heavy rain
-          71: "fas fa-snowflake",             // Slight snow
-          73: "fas fa-snowflake",             // Moderate snow
-          75: "fas fa-snowflake",             // Heavy snow
-          77: "fas fa-snowflake",             // Snow grains
-          80: "fas fa-cloud-rain",            // Slight rain showers
-          81: "fas fa-cloud-showers-heavy",   // Moderate rain showers
-          82: "fas fa-cloud-showers-heavy",   // Violent rain showers
-          85: "fas fa-snowflake",             // Slight snow showers
-          86: "fas fa-snowflake",             // Heavy snow showers
-          95: "fas fa-bolt",                  // Thunderstorm
-          96: "fas fa-bolt",                  // Thunderstorm with slight hail
-          99: "fas fa-bolt"                   // Thunderstorm with heavy hail
-        };
-        return icons[code] || "fas fa-question";
-      };
+    let todayIndex = 0;
+    let tomorrowIndex = 1;
 
-      // AIR QUALITY DATA - Using AccuWeather data
-      display.push({
-        airQuality: `${accuPollen.airQuality.Value} - ${accuPollen.airQuality.Category}`,
-      });
-
-      // POLLEN DATA - Real AccuWeather pollen data
-      display.push({
-        grass: `${accuPollen.grass.Value} - ${accuPollen.grass.Category}`,
-      });
-      display.push({
-        mold: `${accuPollen.mold.Value} - ${accuPollen.mold.Category}`,
-      });
-      display.push({
-        ragweed: `${accuPollen.ragweed.Value} - ${accuPollen.ragweed.Category}`,
-      });
-      display.push({
-        tree: `${accuPollen.tree.Value} - ${accuPollen.tree.Category}`,
-      });
-
-      // Find today's and tomorrow's indices (skip past days)
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-
-      let todayIndex = 0;
-      let tomorrowIndex = 1;
-
-      for (let i = 0; i < daily.time.length; i++) {
-        const date = new Date(daily.time[i]);
-        date.setHours(0, 0, 0, 0);
-        if (date.getTime() === today.getTime()) {
-          todayIndex = i;
-        }
-        if (date.getTime() === tomorrow.getTime()) {
-          tomorrowIndex = i;
-        }
+    for (let i = 0; i < daily.time.length; i++) {
+      const date = new Date(daily.time[i]);
+      date.setHours(0, 0, 0, 0);
+      if (date.getTime() === today.getTime()) {
+        todayIndex = i;
       }
-
-      // TEMPERATURE DATA (already in Fahrenheit from API)
-      display.push({
-        minTemp: Math.round(daily.temperature_2m_min[todayIndex]),
-      });
-      display.push({
-        maxTemp: Math.round(daily.temperature_2m_max[todayIndex]),
-      });
-      display.push({
-        currentTemp: `${Math.round(current.temperature_2m)}`,
-      });
-
-      // Debug cloud cover
-      console.log('Cloud cover raw value:', current.cloud_cover);
-      display.push({
-        cloudCover: `${Math.round(current.cloud_cover || 0)}`,
-      });
-
-      // WIND DATA (already in mph from API)
-      display.push({
-        windGust: `${Math.round(current.wind_gusts_10m || 0)}`,
-      });
-      display.push({
-        windGustDirection: `${getWindArrow(current.wind_direction_10m || 0)} ${getWindDirection(current.wind_direction_10m || 0)}`,
-      });
-      display.push({
-        windSpeed: `${Math.round(current.wind_speed_10m || 0)}`,
-      });
-      display.push({
-        windSpeedDirection: `${getWindArrow(current.wind_direction_10m || 0)} ${getWindDirection(current.wind_direction_10m || 0)}`,
-      });
-
-      // Use apparent temperature (feels like) as soil temp since soil_temperature not available
-      // Apparent temperature accounts for wind chill and humidity, similar concept to thermal mass
-      console.log('Using apparent_temperature as soil temp:', current.apparent_temperature);
-      display.push({
-        soilTemp: Math.round(current.apparent_temperature || current.temperature_2m || 0),
-      });
-
-      // WEATHER FORECAST
-      display.push({
-        forecastToday: getWeatherDescription(daily.weather_code[todayIndex]),
-      });
-      display.push({
-        weatherIcon: getWeatherIcon(daily.weather_code[todayIndex]),
-      });
-
-      // Tomorrow's forecast
-      if (daily.weather_code.length > tomorrowIndex) {
-        display.push({
-          forecastTomorrow: `${getWeatherDescription(daily.weather_code[tomorrowIndex])} - Low: ${Math.round(daily.temperature_2m_min[tomorrowIndex])}°F, High: ${Math.round(daily.temperature_2m_max[tomorrowIndex])}°F`,
-        });
-      } else {
-        display.push({
-          forecastTomorrow: "Not available",
-        });
+      if (date.getTime() === tomorrow.getTime()) {
+        tomorrowIndex = i;
       }
-
-      // SUNRISE/SUNSET
-      display.push({
-        sunrise: new Date(daily.sunrise[todayIndex]).toLocaleString(),
-      });
-      display.push({
-        sunset: new Date(daily.sunset[todayIndex]).toLocaleString(),
-      });
-
-      // OTHER CONDITIONS
-      display.push({
-        humidity: `${Math.round(current.relative_humidity_2m || 0)}`,
-      });
-      display.push({
-        uvIndex: `${daily.uv_index_max?.[0] || 0}`,
-      });
-
-      // Precipitation probability (chance of rain)
-      const precipProb = daily.precipitation_probability_max?.[todayIndex] || 0;
-      display.push({
-        precipitation: precipProb > 0 ? `${precipProb}% chance` : 'No rain expected',
-      });
-
-      temp(display);
-
-      // Display 7-day forecast
-      displayWeekForecast(daily, getWeatherIcon, getWeatherDescription);
-    } catch (error) {
-      console.error("Error fetching weather data:", error);
-      console.error("Error details:", error.response?.data);
-      alert(`Error: ${error.response?.data?.message || error.message}\n\nUnable to fetch weather data for this location.`);
     }
-  })();
+
+    // TEMPERATURE DATA (already in Fahrenheit from API)
+    display.push({
+      minTemp: Math.round(daily.temperature_2m_min[todayIndex]),
+    });
+    display.push({
+      maxTemp: Math.round(daily.temperature_2m_max[todayIndex]),
+    });
+    display.push({
+      currentTemp: `${Math.round(current.temperature_2m)}`,
+    });
+
+    // Debug cloud cover
+    console.log('Cloud cover raw value:', current.cloud_cover);
+    display.push({
+      cloudCover: `${Math.round(current.cloud_cover || 0)}`,
+    });
+
+    // WIND DATA (already in mph from API)
+    display.push({
+      windGust: `${Math.round(current.wind_gusts_10m || 0)}`,
+    });
+    display.push({
+      windGustDirection: `${getWindArrow(current.wind_direction_10m || 0)} ${getWindDirection(current.wind_direction_10m || 0)}`,
+    });
+    display.push({
+      windSpeed: `${Math.round(current.wind_speed_10m || 0)}`,
+    });
+    display.push({
+      windSpeedDirection: `${getWindArrow(current.wind_direction_10m || 0)} ${getWindDirection(current.wind_direction_10m || 0)}`,
+    });
+
+    // Use apparent temperature (feels like) as soil temp since soil_temperature not available
+    // Apparent temperature accounts for wind chill and humidity, similar concept to thermal mass
+    console.log('Using apparent_temperature as soil temp:', current.apparent_temperature);
+    display.push({
+      soilTemp: Math.round(current.apparent_temperature || current.temperature_2m || 0),
+    });
+
+    // WEATHER FORECAST
+    display.push({
+      forecastToday: getWeatherDescription(daily.weather_code[todayIndex]),
+    });
+    display.push({
+      weatherIcon: getWeatherIcon(daily.weather_code[todayIndex]),
+    });
+
+    // Tomorrow's forecast
+    if (daily.weather_code.length > tomorrowIndex) {
+      display.push({
+        forecastTomorrow: `${getWeatherDescription(daily.weather_code[tomorrowIndex])} - Low: ${Math.round(daily.temperature_2m_min[tomorrowIndex])}°F, High: ${Math.round(daily.temperature_2m_max[tomorrowIndex])}°F`,
+      });
+    } else {
+      display.push({
+        forecastTomorrow: "Not available",
+      });
+    }
+
+    // SUNRISE/SUNSET
+    display.push({
+      sunrise: new Date(daily.sunrise[todayIndex]).toLocaleString(),
+    });
+    display.push({
+      sunset: new Date(daily.sunset[todayIndex]).toLocaleString(),
+    });
+
+    // OTHER CONDITIONS
+    display.push({
+      humidity: `${Math.round(current.relative_humidity_2m || 0)}`,
+    });
+    display.push({
+      uvIndex: `${daily.uv_index_max?.[0] || 0}`,
+    });
+
+    // Precipitation probability (chance of rain)
+    const precipProb = daily.precipitation_probability_max?.[todayIndex] || 0;
+    display.push({
+      precipitation: precipProb > 0 ? `${precipProb}% chance` : 'No rain expected',
+    });
+
+    temp(display);
+
+    // Display 7-day forecast
+    displayWeekForecast(daily, getWeatherIcon, getWeatherDescription);
+  } catch (error) {
+    console.error("Error fetching weather data:", error);
+    console.error("Error details:", error.response?.data);
+    alert(`Error: ${error.response?.data?.message || error.message}\n\nUnable to fetch weather data for this location.`);
+  }
 }
 
 // DISPLAY DATA ON THE PAGE

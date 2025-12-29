@@ -7,6 +7,8 @@ const cors = require("cors");
 
 // FETCH BACKGROUND IMAGE FOR STATIC HOME PAGE
 
+// http://localhost:4050/compare.html to verify weather api data
+
 const PORT = process.env.PORT || 4050;
 
 let app = express();
@@ -33,7 +35,9 @@ app.get("/accu/:location", async (req, res) => {
       return res.status(500).json({ type: "error", message: error.message });
     }
     if (response.statusCode !== 200) {
-      return res.status(response.statusCode).json({ type: "error", message: body });
+      return res
+        .status(response.statusCode)
+        .json({ type: "error", message: body });
     }
     res.json(JSON.parse(body));
   });
@@ -48,7 +52,9 @@ app.get("/accuWeather/:locationKey", async (req, res) => {
       return res.status(500).json({ type: "error", message: error.message });
     }
     if (response.statusCode !== 200) {
-      return res.status(response.statusCode).json({ type: "error", message: body });
+      return res
+        .status(response.statusCode)
+        .json({ type: "error", message: body });
     }
     console.log("BODY IN ACCUWEATHER");
     res.json(JSON.parse(body));
@@ -65,7 +71,9 @@ app.get("/accuCurrent/:locationKey", async (req, res) => {
       return res.status(500).json({ type: "error", message: error.message });
     }
     if (response.statusCode !== 200) {
-      return res.status(response.statusCode).json({ type: "error", message: body });
+      return res
+        .status(response.statusCode)
+        .json({ type: "error", message: body });
     }
     // console.log(body, "BODY IN ACCUCURRENT");
     res.json(JSON.parse(body));
@@ -78,10 +86,10 @@ app.get("/unsplash/:location", async (req, res) => {
 
   // Set cache-control headers to prevent Vercel edge caching
   res.set({
-    'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-    'Pragma': 'no-cache',
-    'Expires': '0',
-    'Surrogate-Control': 'no-store'
+    "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
+    Pragma: "no-cache",
+    Expires: "0",
+    "Surrogate-Control": "no-store",
   });
 
   // Use timestamp-based randomization for better variety
@@ -89,15 +97,19 @@ app.get("/unsplash/:location", async (req, res) => {
   const perPage = 30;
   const encodedQuery = encodeURIComponent(location);
   // Add random order_by to get different results
-  const orderBy = Math.random() > 0.5 ? 'relevant' : 'latest';
+  const orderBy = Math.random() > 0.5 ? "relevant" : "latest";
   url = `https://api.unsplash.com/search/photos?page=${randomPage}&query=${encodedQuery}&orientation=landscape&per_page=${perPage}&order_by=${orderBy}&client_id=${api_key}`;
-  console.log(`Fetching Unsplash images for: ${location} (page ${randomPage}, order: ${orderBy})`);
+  console.log(
+    `Fetching Unsplash images for: ${location} (page ${randomPage}, order: ${orderBy})`
+  );
   await request({ url, gzip: true }, (error, response, body) => {
     if (error) {
       return res.status(500).json({ type: "error", message: error.message });
     }
     if (response.statusCode !== 200) {
-      return res.status(response.statusCode).json({ type: "error", message: body });
+      return res
+        .status(response.statusCode)
+        .json({ type: "error", message: body });
     }
     const data = JSON.parse(body);
     console.log(`Returned ${data.results?.length || 0} images for ${location}`);
@@ -128,11 +140,18 @@ app.get("/weather/:location", async (req, res) => {
 
   try {
     // First, geocode the location to get coordinates
-    const geocodeUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(location)}&count=1&language=en&format=json`;
+    const geocodeUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
+      location
+    )}&count=1&language=en&format=json`;
     const geocodeResponse = await axios.get(geocodeUrl);
 
-    if (!geocodeResponse.data.results || geocodeResponse.data.results.length === 0) {
-      return res.status(404).json({ type: "error", message: "Location not found" });
+    if (
+      !geocodeResponse.data.results ||
+      geocodeResponse.data.results.length === 0
+    ) {
+      return res
+        .status(404)
+        .json({ type: "error", message: "Location not found" });
     }
 
     const { latitude, longitude, timezone } = geocodeResponse.data.results[0];
@@ -147,26 +166,30 @@ app.get("/weather/:location", async (req, res) => {
     const pollenUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${latitude}&longitude=${longitude}&current=alder_pollen,birch_pollen,grass_pollen,mugwort_pollen,olive_pollen,ragweed_pollen&timezone=${timezone}`;
 
     // Fetch all data in parallel
-    const [weatherResponse, airQualityResponse, pollenResponse] = await Promise.all([
-      axios.get(weatherUrl),
-      axios.get(airQualityUrl),
-      axios.get(pollenUrl)
-    ]);
+    const [weatherResponse, airQualityResponse, pollenResponse] =
+      await Promise.all([
+        axios.get(weatherUrl),
+        axios.get(airQualityUrl),
+        axios.get(pollenUrl),
+      ]);
 
     // Combine all data
     const combinedData = {
       location: geocodeResponse.data.results[0],
       weather: weatherResponse.data,
       airQuality: airQualityResponse.data,
-      pollen: pollenResponse.data
+      pollen: pollenResponse.data,
     };
 
     res.json(combinedData);
   } catch (error) {
-    console.error("Open-Meteo API Error:", error.response?.data || error.message);
+    console.error(
+      "Open-Meteo API Error:",
+      error.response?.data || error.message
+    );
     return res.status(error.response?.status || 500).json({
       type: "error",
-      message: error.response?.data || error.message
+      message: error.response?.data || error.message,
     });
   }
 });
@@ -178,11 +201,15 @@ app.get("/pollen/:location", async (req, res) => {
 
   try {
     // First, get the location key from AccuWeather
-    const locationUrl = `https://dataservice.accuweather.com/locations/v1/cities/search?apikey=${api_key}&q=${encodeURIComponent(location)}`;
+    const locationUrl = `https://dataservice.accuweather.com/locations/v1/cities/search?apikey=${api_key}&q=${encodeURIComponent(
+      location
+    )}`;
     const locationResponse = await axios.get(locationUrl);
 
     if (!locationResponse.data || locationResponse.data.length === 0) {
-      return res.status(404).json({ type: "error", message: "Location not found" });
+      return res
+        .status(404)
+        .json({ type: "error", message: "Location not found" });
     }
 
     const locationKey = locationResponse.data[0].Key;
@@ -195,19 +222,22 @@ app.get("/pollen/:location", async (req, res) => {
     const airAndPollen = forecastResponse.data.DailyForecasts[0].AirAndPollen;
 
     const pollenData = {
-      grass: airAndPollen.find(item => item.Name === "Grass"),
-      mold: airAndPollen.find(item => item.Name === "Mold"),
-      ragweed: airAndPollen.find(item => item.Name === "Ragweed"),
-      tree: airAndPollen.find(item => item.Name === "Tree"),
-      airQuality: airAndPollen.find(item => item.Name === "AirQuality")
+      grass: airAndPollen.find((item) => item.Name === "Grass"),
+      mold: airAndPollen.find((item) => item.Name === "Mold"),
+      ragweed: airAndPollen.find((item) => item.Name === "Ragweed"),
+      tree: airAndPollen.find((item) => item.Name === "Tree"),
+      airQuality: airAndPollen.find((item) => item.Name === "AirQuality"),
     };
 
     res.json(pollenData);
   } catch (error) {
-    console.error("AccuWeather Pollen API Error:", error.response?.data || error.message);
+    console.error(
+      "AccuWeather Pollen API Error:",
+      error.response?.data || error.message
+    );
     return res.status(error.response?.status || 500).json({
       type: "error",
-      message: error.response?.data || error.message
+      message: error.response?.data || error.message,
     });
   }
 });
