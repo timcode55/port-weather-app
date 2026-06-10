@@ -1,6 +1,5 @@
 const express = require("express");
 const path = require("path");
-const request = require("request");
 require("dotenv").config();
 const axios = require("axios");
 const cors = require("cors");
@@ -29,55 +28,47 @@ app.get("/test", (req, res) => {
 app.get("/accu/:location", async (req, res) => {
   const location = req.params.location;
   let api_key = process.env.ACCU_KEY;
-  url = `https://dataservice.accuweather.com/locations/v1/cities/search?apikey=${api_key}&q=${location}&details=true`;
-  await request({ url, gzip: true }, (error, response, body) => {
-    if (error) {
-      return res.status(500).json({ type: "error", message: error.message });
+  const url = `https://dataservice.accuweather.com/locations/v1/cities/search?apikey=${api_key}&q=${location}&details=true`;
+  try {
+    const response = await axios.get(url);
+    res.json(response.data);
+  } catch (error) {
+    if (error.response) {
+      return res.status(error.response.status).json({ type: "error", message: error.response.data });
     }
-    if (response.statusCode !== 200) {
-      return res
-        .status(response.statusCode)
-        .json({ type: "error", message: body });
-    }
-    res.json(JSON.parse(body));
-  });
+    return res.status(500).json({ type: "error", message: error.message });
+  }
 });
 
 app.get("/accuWeather/:locationKey", async (req, res) => {
   const locationKey = req.params.locationKey;
   let api_key = process.env.ACCU_KEY;
-  url = `https://dataservice.accuweather.com/forecasts/v1/daily/1day/${locationKey}?apikey=${api_key}&details=true`;
-  await request({ url, gzip: true }, (error, response, body) => {
-    if (error) {
-      return res.status(500).json({ type: "error", message: error.message });
+  const url = `https://dataservice.accuweather.com/forecasts/v1/daily/1day/${locationKey}?apikey=${api_key}&details=true`;
+  try {
+    const response = await axios.get(url);
+    res.json(response.data);
+  } catch (error) {
+    if (error.response) {
+      return res.status(error.response.status).json({ type: "error", message: error.response.data });
     }
-    if (response.statusCode !== 200) {
-      return res
-        .status(response.statusCode)
-        .json({ type: "error", message: body });
-    }
-    console.log("BODY IN ACCUWEATHER");
-    res.json(JSON.parse(body));
-  });
+    return res.status(500).json({ type: "error", message: error.message });
+  }
 });
 
 app.get("/accuCurrent/:locationKey", async (req, res) => {
   const locationKey = req.params.locationKey;
   console.log("accuCurrent Called", locationKey);
   let api_key = process.env.ACCU_KEY;
-  let url = `https://dataservice.accuweather.com/currentconditions/v1/${locationKey}?apikey=${api_key}&details=true`; // Define url as a local variable
-  await request({ url, gzip: true }, (error, response, body) => {
-    if (error) {
-      return res.status(500).json({ type: "error", message: error.message });
+  const url = `https://dataservice.accuweather.com/currentconditions/v1/${locationKey}?apikey=${api_key}&details=true`;
+  try {
+    const response = await axios.get(url);
+    res.json(response.data);
+  } catch (error) {
+    if (error.response) {
+      return res.status(error.response.status).json({ type: "error", message: error.response.data });
     }
-    if (response.statusCode !== 200) {
-      return res
-        .status(response.statusCode)
-        .json({ type: "error", message: body });
-    }
-    // console.log(body, "BODY IN ACCUCURRENT");
-    res.json(JSON.parse(body));
-  });
+    return res.status(500).json({ type: "error", message: error.message });
+  }
 });
 
 app.get("/unsplash/:location", async (req, res) => {
@@ -98,23 +89,20 @@ app.get("/unsplash/:location", async (req, res) => {
   const encodedQuery = encodeURIComponent(location);
   // Add random order_by to get different results
   const orderBy = Math.random() > 0.5 ? "relevant" : "latest";
-  url = `https://api.unsplash.com/search/photos?page=${randomPage}&query=${encodedQuery}&orientation=landscape&per_page=${perPage}&order_by=${orderBy}&client_id=${api_key}`;
+  const url = `https://api.unsplash.com/search/photos?page=${randomPage}&query=${encodedQuery}&orientation=landscape&per_page=${perPage}&order_by=${orderBy}&client_id=${api_key}`;
   console.log(
     `Fetching Unsplash images for: ${location} (page ${randomPage}, order: ${orderBy})`
   );
-  await request({ url, gzip: true }, (error, response, body) => {
-    if (error) {
-      return res.status(500).json({ type: "error", message: error.message });
+  try {
+    const response = await axios.get(url);
+    console.log(`Returned ${response.data.results?.length || 0} images for ${location}`);
+    res.json(response.data);
+  } catch (error) {
+    if (error.response) {
+      return res.status(error.response.status).json({ type: "error", message: error.response.data });
     }
-    if (response.statusCode !== 200) {
-      return res
-        .status(response.statusCode)
-        .json({ type: "error", message: body });
-    }
-    const data = JSON.parse(body);
-    console.log(`Returned ${data.results?.length || 0} images for ${location}`);
-    res.json(data);
-  });
+    return res.status(500).json({ type: "error", message: error.message });
+  }
 });
 
 // app.get("/mapbox/:location", async (req, res) => {
