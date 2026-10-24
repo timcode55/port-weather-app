@@ -22,9 +22,9 @@
     "form-data": "^4.0.6"
   },
   "dependencies": {
-    "axios": "^1.18.1",
-    "cors": "^2.8.5",
-    "dotenv": "^8.2.0",
-    "express": "^4.17.1"
+    "axios": "^1.20.0",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.9",
+    "express": "^5.3.0"
   }
 }
